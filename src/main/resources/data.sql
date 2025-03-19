@@ -1,40 +1,46 @@
--- data.sql
-
--- Inserindo papéis (roles)
+-- 1. Inserindo roles
 INSERT INTO role (name) VALUES
-('ADMIN'),
-('PUBLICO'),
-('ADMIN2'),
-('ADMIN3'),
-('ADMIN4');
+('POLICIAL'),
+('AGENTE_SEGURANCA'),
+('INVESTIGADOR'),
+('GESTOR_SEGURANCA_PUBLICA'),
+('CIDADAO_ANONIMO');
 
-INSERT INTO users (username, password) VALUES
-('admin', '$2a$10$XgTR9fHHzB0IQi3xV0W0g.mS2INXDr5L7.OaOkHcdwhHZPuhzoQu.'),  -- senha: adminpassword
-('public_user', '$2a$10$7Y2Iub7PUl8gA8E0FJ8TYC1ePjpmTTW1zcoLOy.N7sAvz7QVVjsr2'),  -- senha: publicpassword
-('admin2', '$2a$10$7oOuGj8eqnvmvS.Z9d3iH7gxhI3y3hK51I7XzOxShhFcChvN95cT2'),  -- senha: admin2password
-('admin3', '$2a$10$rgSkQ2vS5Fl5D4KfC28Fsu6r7pTyH28jc5pYfrQe5LzH5Xcm7tS4m'),  -- senha: admin3password
-('admin4', '$2a$10$tnLtECM0hrh.sHGELzptbW9wToY7au42oi2s6pz7f7.PYTt2c9TOO');  -- senha: admin4password
+-- 2. Inserindo permissões
+INSERT INTO permissions (name) VALUES
+('Tela Ocorrencia'),
+('Tela Detalhes'),
+('Tela Mudar Detalhes Ocorrenciais'),
+('Tela de Investigador'),
+('Relatórios'),
+('Tela Inicial dos Detalhes'),
+('Login');
 
--- Associando usuários com papéis (roles)
--- Associa o usuário "admin" com todos os papéis
-INSERT INTO user_roles (user_id, role_id) VALUES
-((SELECT id FROM users WHERE username = 'admin'), (SELECT id FROM role WHERE name = 'ADMIN')),
-((SELECT id FROM users WHERE username = 'admin'), (SELECT id FROM role WHERE name = 'ADMIN2')),
-((SELECT id FROM users WHERE username = 'admin'), (SELECT id FROM role WHERE name = 'ADMIN3')),
-((SELECT id FROM users WHERE username = 'admin'), (SELECT id FROM role WHERE name = 'ADMIN4'));
+-- 3. Associando permissões às roles
+-- POLICIAL e AGENTE_SEGUANCA - Tela ocorrencia, Tela detalhes, Tela mudar detalhes ocorrenciais, login
+INSERT INTO role_permissions (role_id, permission_id) VALUES
+((SELECT id FROM role WHERE name = 'POLICIAL'), (SELECT id FROM permissions WHERE name = 'Tela Ocorrencia')),
+((SELECT id FROM role WHERE name = 'POLICIAL'), (SELECT id FROM permissions WHERE name = 'Tela Detalhes')),
+((SELECT id FROM role WHERE name = 'POLICIAL'), (SELECT id FROM permissions WHERE name = 'Tela Mudar Detalhes Ocorrenciais')),
+((SELECT id FROM role WHERE name = 'POLICIAL'), (SELECT id FROM permissions WHERE name = 'Login')),
+((SELECT id FROM role WHERE name = 'AGENTE_SEGURANCA'), (SELECT id FROM permissions WHERE name = 'Tela Ocorrencia')),
+((SELECT id FROM role WHERE name = 'AGENTE_SEGURANCA'), (SELECT id FROM permissions WHERE name = 'Tela Detalhes')),
+((SELECT id FROM role WHERE name = 'AGENTE_SEGURANCA'), (SELECT id FROM permissions WHERE name = 'Tela Mudar Detalhes Ocorrenciais')),
+((SELECT id FROM role WHERE name = 'AGENTE_SEGURANCA'), (SELECT id FROM permissions WHERE name = 'Login'));
 
--- Associa o usuário "public_user" com o papel "PUBLICO"
-INSERT INTO user_roles (user_id, role_id) VALUES
-((SELECT id FROM users WHERE username = 'public_user'), (SELECT id FROM role WHERE name = 'PUBLICO'));
+-- INVESTIGADOR - tudo do policial + Tela de investigador
+INSERT INTO role_permissions (role_id, permission_id) VALUES
+((SELECT id FROM role WHERE name = 'INVESTIGADOR'), (SELECT id FROM permissions WHERE name = 'Tela Ocorrencia')),
+((SELECT id FROM role WHERE name = 'INVESTIGADOR'), (SELECT id FROM permissions WHERE name = 'Tela Detalhes')),
+((SELECT id FROM role WHERE name = 'INVESTIGADOR'), (SELECT id FROM permissions WHERE name = 'Tela Mudar Detalhes Ocorrenciais')),
+((SELECT id FROM role WHERE name = 'INVESTIGADOR'), (SELECT id FROM permissions WHERE name = 'Tela de Investigador')),
+((SELECT id FROM role WHERE name = 'INVESTIGADOR'), (SELECT id FROM permissions WHERE name = 'Login'));
 
--- Associa o usuário "admin2" com o papel "ADMIN2"
-INSERT INTO user_roles (user_id, role_id) VALUES
-((SELECT id FROM users WHERE username = 'admin2'), (SELECT id FROM role WHERE name = 'ADMIN2'));
+-- GESTOR_SEGURANCA_PUBLICA - apenas relatórios e acesso às telas com permissão de leitura
+INSERT INTO role_permissions (role_id, permission_id) VALUES
+((SELECT id FROM role WHERE name = 'GESTOR_SEGURANCA_PUBLICA'), (SELECT id FROM permissions WHERE name = 'Relatórios'));
 
--- Associa o usuário "admin3" com o papel "ADMIN3"
-INSERT INTO user_roles (user_id, role_id) VALUES
-((SELECT id FROM users WHERE username = 'admin3'), (SELECT id FROM role WHERE name = 'ADMIN3'));
-
--- Associa o usuário "admin4" com o papel "ADMIN4"
-INSERT INTO user_roles (user_id, role_id) VALUES
-((SELECT id FROM users WHERE username = 'admin4'), (SELECT id FROM role WHERE name = 'ADMIN4'));
+-- CIDADAO_ANONIMO - apenas tela inicial dos detalhes e login
+INSERT INTO role_permissions (role_id, permission_id) VALUES
+((SELECT id FROM role WHERE name = 'CIDADAO_ANONIMO'), (SELECT id FROM permissions WHERE name = 'Tela Inicial dos Detalhes')),
+((SELECT id FROM role WHERE name = 'CIDADAO_ANONIMO'), (SELECT id FROM permissions WHERE name = 'Login'));

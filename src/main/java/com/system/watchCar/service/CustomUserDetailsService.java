@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CustomUserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
 
@@ -22,11 +24,14 @@ public class CustomUserDetailsService implements org.springframework.security.co
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         // Converta o UserEntity para UserDetails
-        return new User(userEntity.getUsername(), userEntity.getPassword(),
-                userEntity.getRoles().stream()
-                        // Extrair o nome do role, supondo que o Role tenha o método getName
-                        .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role.getName()))
-                        .collect(java.util.stream.Collectors.toList()));
+        return new org.springframework.security.core.userdetails.User(
+                userEntity.getUsername(),
+                userEntity.getPassword(),
+                // Aqui usamos getName() para obter o nome da Role e criar a autoridade
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(userEntity.getRole().getName()))
+        );
     }
+
+
 
 }

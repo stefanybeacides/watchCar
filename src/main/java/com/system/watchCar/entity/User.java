@@ -2,8 +2,8 @@ package com.system.watchCar.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -29,20 +29,24 @@ public class User {
 
     @Email
     private String email;
+
+    @ManyToOne(fetch = FetchType.EAGER)  // Um usuário pode ter somente uma Role
+    @JoinColumn(name = "role_id")  // Chave estrangeira que referencia a tabela "role"
+    private Role role;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+            name = "role_permissions",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
-    private List<Role> roles;
+    private List<Permission> permissions; // Adiciona a lista de permissões
 
-    @Autowired
+
+    // Método para obter as authorities do usuário para autenticação
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> (GrantedAuthority) () -> role.getName())
-                .toList();
+        // Atribuindo a autoridade usando o nome da role
+        return List.of(new SimpleGrantedAuthority(role.getName()));  // Assuming "getName()" retrieves the role's name
     }
 
 }
-

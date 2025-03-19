@@ -22,7 +22,7 @@ public class JwtTokenUtil {
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("roles", user.getRoles()) // Adiciona os papéis ao token
+                .claim("roles", user.getRole()) // Adiciona os papéis ao token
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)

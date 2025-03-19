@@ -2,7 +2,10 @@ package com.system.watchCar.service;
 
 import com.system.watchCar.dto.CustomUserDetails;
 import com.system.watchCar.dto.RegisterRequest;
+import com.system.watchCar.entity.Permission;
+import com.system.watchCar.entity.Role;
 import com.system.watchCar.entity.User;
+import com.system.watchCar.repository.RoleRepository;
 import com.system.watchCar.repository.UserRepository;
 import com.system.watchCar.security.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +15,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class AuthenticationService {
+
+    @Autowired
+    RoleRepository roleRepository;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -64,16 +71,29 @@ public class AuthenticationService {
         // Criptografar a senha
         String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
 
+        // Verificar se a Role existe
+        Role role = roleRepository.findById(registerRequest.getRole())
+                .orElseThrow(() -> new RuntimeException("Role not found with id: " + registerRequest.getRole()));
+
         // Criar um novo usuário
-        User newUser = new User();
-        newUser.setUsername(registerRequest.getUsername());
-        newUser.setPassword(encodedPassword);
+        User newUser  = new User();
+        newUser .setUsername(registerRequest.getUsername());
+        newUser .setPassword(encodedPassword);
+        newUser .setEmail(registerRequest.getEmail());
+        newUser .setRole(role); // Atribui a Role ao usuário
 
         // Salvar o usuário no banco de dados
-        userRepository.save(newUser);
+        userRepository.save(newUser );
     }
+
+
     public User getUserDetails(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User  not found"));
+    }
+
+    public List<Permission> getUserPermissions(String username) {
+        User user = getUserDetails(username);
+        return user.getPermissions();
     }
 }
