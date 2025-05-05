@@ -2,7 +2,6 @@ package com.system.watchCar.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
@@ -14,35 +13,35 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
+@Table(name = "TB_USUARIO")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq")
+    @SequenceGenerator(name = "usuario_seq", sequenceName = "ISEQ$$_76217", allocationSize = 1)
+    @Column(name = "ID")
     private Long id;
 
     @NotBlank
+    @Column(name = "NOME")
     private String username;
 
     @NotBlank
+    @Column(name = "SENHA")
     private String password;
 
     @Email
+    @Column(name = "EMAIL")
     private String email;
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private List<Role> roles;
 
-    @Autowired
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> (GrantedAuthority) () -> role.getName())
-                .toList();
-    }
+    // Adicionando os campos CPF e ALERTA
+    @Column(name = "CPF", length = 11)
+    private String cpf;
 
+    @Column(name = "ALERTA")
+    private Boolean alerta; // ALERTA pode ser true ou false
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "TIPO", referencedColumnName = "ID")
+    private Role role;
 }
-

@@ -1,16 +1,12 @@
 package com.system.watchCar.dto;
 
-
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Data
-@Getter
-@Setter
 public class RegisterRequest {
 
     @NotBlank(message = "Username is required")
@@ -21,4 +17,10 @@ public class RegisterRequest {
 
     @Email(message = "Email should be valid")
     private String email;
+
+    @NotBlank(message = "CPF is required")
+    private String cpf;
+
+    @NotNull(message = "Tipo is required")
+    private Integer tipo;
 }

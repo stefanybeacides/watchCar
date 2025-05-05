@@ -4,6 +4,7 @@ import com.system.watchCar.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -40,6 +41,7 @@ public class HttpSecurityConfig {
 
         // Configuração de permissão para URLs
         http.authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll() // permite preflight
                 .antMatchers("/api/login").permitAll() // Permitir login sem autenticação
                 .antMatchers("/api/register").permitAll() // Permitir registro sem autenticação
                 .antMatchers("/api/user").authenticated() // Requer autenticação para acessar /user

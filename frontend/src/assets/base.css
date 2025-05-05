@@ -36,6 +36,7 @@
   --section-gap: 160px;
 }
 
+/* Dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: var(--vt-c-black);
@@ -58,29 +59,70 @@
   font-weight: normal;
 }
 
+/* Garante que o corpo ocupe toda a altura da tela */
 body {
-  min-height: 100vh;
-  color: var(--color-text);
-  background: var(--color-background);
-  transition:
-    color 0.5s,
-    background-color 0.5s;
-  line-height: 1.6;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
-  font-size: 15px;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh; /* Corpo ocupa toda a altura */
+  display: flex; /* Flexbox para ajustar o layout */
+  flex-direction: column; /* Alinha o conteúdo em coluna */
+  justify-content: space-between; /* Distribui o conteúdo, empurrando o rodapé para o fim */
+}
+
+#app {
+  width: 100%; /* Ocupa toda a largura */
+  height: 100vh; /* Ocupa toda a altura da tela */
+  padding: 2rem; /* Padding interno */
+  display: flex;
+  flex-direction: column; /* Organiza os itens de forma vertical */
+  justify-content: space-between; /* Garante que o conteúdo seja distribuído de forma adequada */
+  font-weight: normal;
+}
+
+/* Estilos para links */
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+/* Efeito hover em links */
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+/* Responsividade para telas grandes */
+@media (min-width: 1024px) {
+  #app {
+    display: flex;
+    flex-direction: column; /* Continuar com a direção de coluna, para não mudar a estrutura */
+    padding: 2rem;
+    width: 100%; /* Garantir que ocupe toda a largura */
+    height: 100vh; /* Garantir que ocupe toda a altura */
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column; /* Garantir que a estrutura fique em coluna */
+    min-height: 100vh;
+  }
+
+  .main-content {
+    flex: 1; /* Certifica-se de que o conteúdo vai ocupar o restante do espaço disponível */
+    padding: 2rem;
+    width: 100%;
+    background-color: #ffffff;
+  }
+
+  /* Rodapé e Navbar */
+  .footer,
+  .navbar {
+    width: 100%; /* Garantir que ocupe toda a largura da tela */
+  }
+
+  .navbar {
+    padding: 1.5rem 2rem;
+  }
 }

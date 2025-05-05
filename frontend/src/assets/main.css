@@ -1,12 +1,17 @@
 @import './base.css';
 
+/* Garante que o app ocupe toda a largura e altura da tela */
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%; /* Ocupa toda a largura da tela */
+  height: 100vh; /* Ocupa toda a altura da tela */
+  padding: 2rem; /* Espaçamento interno */
   font-weight: normal;
+  display: flex;
+  flex-direction: column; /* Alinha o conteúdo em coluna */
+  justify-content: space-between; /* Garante que o conteúdo se distribua */
 }
 
+/* Estilo de links e botões */
 a,
 .green {
   text-decoration: none;
@@ -15,21 +20,17 @@ a,
   padding: 3px;
 }
 
+/* Efeito de hover nos links */
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
   }
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+/* Garantir que o corpo ocupe toda a altura e largura da tela */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* Alinha o conteúdo verticalmente */
+  justify-content: space-between; /* Empurra o conteúdo para as extremidades */
 }

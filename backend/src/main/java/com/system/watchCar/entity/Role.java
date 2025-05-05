@@ -1,22 +1,22 @@
 package com.system.watchCar.entity;
 
+import com.system.watchCar.dto.RoleType;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "TB_USUARIO_ROLE")
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ROLE", nullable = false, unique = true)
+    private RoleType name;
 }

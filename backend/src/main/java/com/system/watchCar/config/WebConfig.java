@@ -3,17 +3,18 @@ package com.system.watchCar.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:8080")  // Altere conforme sua configuração
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowedOriginPatterns("*") // aceita todas as origens
+                .allowedMethods("*")        // aceita todos os métodos: GET, POST, PUT, DELETE, etc.
+                .allowedHeaders("*")        // aceita todos os headers
+                .allowCredentials(true);    // permite envio de cookies/autenticação (se necessário)
     }
 }
+
+
 

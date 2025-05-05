@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.http.ResponseEntity;
+
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -39,7 +42,7 @@ public class AuthenticationController {
     })
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
-        String token = authenticationService.generateToken(loginRequest.getUsername(), loginRequest.getPassword());
+        String token = authenticationService.generateToken(loginRequest.getCpf(), loginRequest.getPassword());
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
@@ -50,10 +53,11 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "409", description = "Username already exists")
     })
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         authenticationService.register(registerRequest);
-        return ResponseEntity.status(201).build(); // Retorna 201 Created
-    }
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(Map.of("success", true, "message", "Usuário criado com sucesso"));    }
 
     @Operation(summary = "Get user details", description = "Retrieve the details of the authenticated user")
     @ApiResponses(value = {
