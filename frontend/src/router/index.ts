@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LoginCadastro from '../views/LoginCadastro.vue'
+import Cadastro from '../views/Cadastro.vue'
+import Login from '../views/Login.vue'
 import Inicio from '../views/Inicio.vue'
 import Sobre from '../views/Sobre.vue'
 import Ocorrencias from '../views/Ocorrencias.vue'
@@ -15,8 +16,13 @@ const router = createRouter({
     },
     {
       path: '/login',
-      name: 'loginCadastro', // A página de login/cadastro
-      component: LoginCadastro,
+      name: 'login', // A página de login/cadastro
+      component: Login,
+    },
+    {
+      path: '/register',
+      name: 'cadastro', // A página de login/cadastro
+      component: Cadastro,
     },
     {
       path: '/sobre',

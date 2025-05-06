@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watchEffect } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { toast } from 'vue3-toastify'
 
 const router = useRouter()
 
@@ -58,13 +59,14 @@ div.layout
       nav.nav-buttons
         div.nav-buttons(v-if="!isLoggedIn")
           RouterLink.nav-button(to="/login") Login
-          RouterLink.nav-button.primary(to="/login") Cadastre-se
+          RouterLink.nav-button.primary(to="/register") Cadastre-se
         div(v-if="isLoggedIn")
           span.nav-user-name {{ userName }}
           button.nav-button.primary(@click="handleLogout") Sair
 
   main.main-content
     RouterView
+    ToastContainer  <!-- ADICIONADO AQUI! -->
 
   footer.footer
     p © 2025 - Todos os direitos reservados

@@ -41,7 +41,25 @@ public class User {
     @Column(name = "ALERTA")
     private Boolean alerta; // ALERTA pode ser true ou false
 
+    // Relacionamento com a role (papel do usuário)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "TIPO", referencedColumnName = "ID")
     private Role role;
+
+    // Campos adicionais para perfis específicos
+
+    @Column(name = "DELEGACIA")
+    private String delegate; // Para Policial, Agente de Segurança, Investigador
+
+    @Column(name = "DISTINTIVO")
+    private String badge; // Para Policial, Agente de Segurança, Investigador
+
+    @Column(name = "RA")
+    private String ra; // Para Policial, Agente de Segurança, Investigador
+
+    @Column(name = "DEPARTAMENTO")
+    private String departamento; // Para Gestor de Segurança Pública
+
+    @Column(name = "CARGO")
+    private String cargo; // Para Gestor de Segurança Pública
 }

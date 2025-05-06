@@ -1,6 +1,5 @@
 package com.system.watchCar.entity;
 
-import com.system.watchCar.dto.RoleType;
 import lombok.Getter;
 import lombok.Setter;
 
