@@ -23,13 +23,15 @@ public class OcorrenciaService {
     private final TipoVeiculoRepository tipoVeiculoRepository;
     private final VeiculoRepository veiculoRepository;
     private final ResponsavelRepository responsavelRepository;
+    private final ArtigoRepository artigoRepository;
 
-    public OcorrenciaService(OcorrenciaRepository repository, UserRepository userRepository, TipoVeiculoRepository tipoVeiculoRepository, VeiculoRepository veiculoRepository, ResponsavelRepository responsavelRepository) {
+    public OcorrenciaService(OcorrenciaRepository repository, UserRepository userRepository, TipoVeiculoRepository tipoVeiculoRepository, VeiculoRepository veiculoRepository, ResponsavelRepository responsavelRepository, ArtigoRepository artigoRepository) {
         this.repository = repository;
         this.userRepository = userRepository;
         this.tipoVeiculoRepository = tipoVeiculoRepository;
         this.veiculoRepository = veiculoRepository;
         this.responsavelRepository = responsavelRepository;
+        this.artigoRepository = artigoRepository;
     }
 
 
@@ -53,7 +55,10 @@ public class OcorrenciaService {
                     // Buscar o veículo
                     Veiculo veiculo = veiculoRepository.findById(ocorrencia.getIdVeiculo()).orElse(null);
 
-                    // Mapear a ocorrência para o DTO com dados do usuário e veículo
+                    // Buscar o artigo relacionado à ocorrência
+                    Artigo artigoCriminal = artigoRepository.findById(Long.valueOf(ocorrencia.getCodArtigo())).orElse(null);
+
+                    // Mapear a ocorrência para o DTO com dados do usuário, veículo e artigo
                     OcorrenciaDTO dto = new OcorrenciaDTO();
                     dto.setId(ocorrencia.getId());
                     dto.setDescricaoOcorrencia(ocorrencia.getDescricaoOcorrencia());
@@ -72,6 +77,12 @@ public class OcorrenciaService {
                         dto.setVeiculoMarca(veiculo.getTipoVeiculo().getMarca());
                     }
 
+                    if (artigoCriminal != null) {
+                        dto.setArtigoId(artigoCriminal.getId());
+                        dto.setArtigoCodigo(artigoCriminal.getCodArtigo());
+                        dto.setArtigoDescricao(artigoCriminal.getDescricao());
+                    }
+
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -79,6 +90,7 @@ public class OcorrenciaService {
         // Retornar as ocorrências completas como um Page DTO
         return new PageImpl<>(ocorrenciasComDetalhes, pageRequest, ocorrencias.getTotalElements());
     }
+
 
     @Transactional
     public Ocorrencia criarDenuncia(DenunciaRequest request) {
@@ -110,6 +122,7 @@ public class OcorrenciaService {
         veiculo.setPlaca(request.getPlaca());
         veiculo = veiculoRepository.save(veiculo);
 
+
         // 5. Criar denúncia
         Ocorrencia ocorrencia = new Ocorrencia();
         ocorrencia.setIdUsuario(usuario.getId());
@@ -118,7 +131,7 @@ public class OcorrenciaService {
         ocorrencia.setHoraOcorrencia(request.getHoraOcorrencia());
         ocorrencia.setDataHora(request.getDataHora() != null ? request.getDataHora() : LocalDateTime.now()); // Usar a data atual caso não seja fornecida
         ocorrencia.setIdVeiculo(veiculo.getId());
-
+        ocorrencia.setCodArtigo(request.getArtigoLei());
         ocorrencia = repository.save(ocorrencia);
 
         // 6. Se o usuário tiver distintivo e delegacia, cria um responsável
@@ -139,7 +152,6 @@ public class OcorrenciaService {
         // Validar que o status está dentro dos valores possíveis
         return "Em andamento".equals(status) || "Solucionado".equals(status) || "Arquivado".equals(status);
     }
-
 
 }
 

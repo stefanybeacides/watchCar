@@ -6,6 +6,26 @@ const getAuthToken = () => {
   return localStorage.getItem('authToken')
 }
 
+export const enviarDenuncia = async (denuncia: any) => {
+  const token = getAuthToken()
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado')
+  }
+
+  try {
+    const response = await api.post('/criar', denuncia, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return response.data
+  } catch (error) {
+    console.error('Erro ao enviar denúncia:', error)
+    throw error
+  }
+}
 // Função para obter as ocorrências com filtros e paginação
 export const obterOcorrencias = async (
   filters: { status: string; artigo: string; hora: string; dataInicio: string; dataFim: string },

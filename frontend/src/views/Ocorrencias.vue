@@ -5,13 +5,17 @@
     //- Filtros e botão
     .filters
       .inputs
-      .filters .inputs
+      .filters.inputs
         select(v-model="filters.status")
           option(value="") Selecione o Status
-          option(value="Em andamento") Em andamento
+          option(value="Em andamento") Em Andamento
           option(value="Solucionado") Solucionado
           option(value="Arquivado") Arquivado
-        input(type="text" v-model="filters.artigo" placeholder="Artigo")
+        select(v-model="filters.artigo" id="artigo" name="artigo")
+          option(value="") Selecione o Artigo
+          // Iterar sobre os artigos e exibir o código e descrição
+          option(v-for="artigo in artigos" :key="artigo.id" :value="artigo.id")
+            | {{ artigo.codArtigo }} - {{ artigo.descricao }}
         input(type="text" v-model="filters.hora" placeholder="Hora")
         input(type="datetime-local" v-model="filters.dataInicio" placeholder="Data Início")
         input(type="datetime-local" v-model="filters.dataFim" placeholder="Data Fim")
@@ -31,9 +35,10 @@
             th Hora
             th Data
             th Descrição
+            th Artigo
         tbody
           tr(v-if="ocorrencias.length === 0")
-            td(colspan="9") Sem registros
+            td(colspan="10" style="text-align: center;") Sem registros
           tr(v-for="(ocorrencia, index) in ocorrencias" :key="index")
             td {{ ocorrencia.usuarioNome }}
             td {{ ocorrencia.usuarioEmail }}
@@ -44,6 +49,7 @@
             td {{ ocorrencia.horaOcorrencia }}
             td {{ ocorrencia.dataHora }}
             td {{ ocorrencia.descricaoOcorrencia }}
+            td {{ ocorrencia.artigoCodigo }} - {{ ocorrencia.artigoDescricao }}
 
       //- Paginação à direita
       .pagination
@@ -55,11 +61,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { obterOcorrencias } from '@/services/ocorrenciasService'
+import { buscarArtigos } from '@/services/artigoService'
 
 const ocorrencias = ref<any[]>([])
+const artigos = ref<any[]>([]) // Para armazenar os artigos
 const filters = ref({
   status: '',
-  artigo: '',
+  artigo: '', // Aqui vai o ID do artigo
   hora: '',
   dataInicio: '',
   dataFim: '',
@@ -74,6 +82,7 @@ if (!token) {
   window.location.href = '/login'
 }
 
+// Função para carregar as ocorrências
 const fetchOcorrencias = async () => {
   try {
     const data = await obterOcorrencias(filters.value, currentPage.value, pageSize.value)
@@ -84,6 +93,16 @@ const fetchOcorrencias = async () => {
   }
 }
 
+// Função para carregar os artigos
+const fetchArtigos = async () => {
+  try {
+    const data = await buscarArtigos() // Supondo que você tenha esse serviço para pegar os artigos
+    artigos.value = data // Armazena os artigos retornados da API
+  } catch (error) {
+    console.error('Erro ao carregar os artigos:', error)
+  }
+}
+
 const changePage = (page: number) => {
   if (page >= 0 && page < totalPages.value) {
     currentPage.value = page
@@ -91,7 +110,11 @@ const changePage = (page: number) => {
   }
 }
 
-onMounted(fetchOcorrencias)
+// Chama as funções quando o componente for montado
+onMounted(() => {
+  fetchOcorrencias()
+  fetchArtigos() // Chama para buscar os artigos
+})
 </script>
 
 <style scoped>
@@ -124,7 +147,7 @@ onMounted(fetchOcorrencias)
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  width: 150px;
+  width: 180px;
 }
 
 .filters .btn {
@@ -203,7 +226,7 @@ onMounted(fetchOcorrencias)
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  width: 150px;
+  width: 200px;
   font-size: 0.875rem;
 }
 </style>

@@ -23,5 +23,8 @@ public class DenunciaRequest {
     private String modelo;
     private String marca;
     private String cor;
+
+    private String artigoLei;
+
 }
 

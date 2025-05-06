@@ -19,4 +19,9 @@ public class OcorrenciaDTO {
     private String veiculoPlaca;
     private String veiculoModelo;
     private String veiculoMarca;
+
+    // Novo campo para Artigo
+    private Long artigoId;
+    private String artigoCodigo;
+    private String artigoDescricao;
 }
