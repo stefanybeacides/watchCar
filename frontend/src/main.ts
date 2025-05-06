@@ -1,6 +1,6 @@
 import './assets/main.css'
 import 'vue3-toastify/dist/index.css'
-
+import '@fortawesome/fontawesome-free/css/all.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import Vue3Toastify from 'vue3-toastify'

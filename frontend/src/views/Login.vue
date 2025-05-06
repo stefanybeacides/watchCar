@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { login as loginApi, fetchUserData as fetchUserData } from '@/services/authService'
 import { toast } from 'vue3-toastify'
@@ -47,6 +47,14 @@ const showPassword = ref(false)
 const cpfError = ref('')
 const router = useRouter()
 const forgotPasswordModal = ref<InstanceType<typeof ForgotPasswordModal> | null>(null)
+
+onMounted(() => {
+  const msg = localStorage.getItem('loginMessage')
+  if (msg) {
+    toast.error(msg)
+    localStorage.removeItem('loginMessage')
+  }
+})
 
 const openForgotPasswordModal = () => {
   if (forgotPasswordModal.value) {

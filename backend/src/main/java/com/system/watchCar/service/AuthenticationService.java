@@ -60,7 +60,7 @@ public class AuthenticationService {
         throw new RuntimeException("Invalid username or password");
     }
 
-    public void register(RegisterRequest registerRequest) { 
+    public void register(RegisterRequest registerRequest) {
         // Codificando a senha antes de salvar
         String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
 
