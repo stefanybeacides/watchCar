@@ -113,12 +113,14 @@ const handleLogin = async () => {
       localStorage.setItem('authToken', response.token)
 
       const userData = await fetchUserData()
+      toast.success('Login realizado com sucesso!')
       localStorage.setItem('userName', userData.username)
+      localStorage.setItem('userPerfil', userData.role.name)
+      localStorage.setItem('userId', userData.id)
 
       window.dispatchEvent(new Event('storage'))
       await router.push({ name: 'inicio' })
-
-      toast.success('Login realizado com sucesso!')
+      window.location.reload()
     } else {
       toast.error('Erro ao fazer login. Verifique seu CPF e senha.')
     }

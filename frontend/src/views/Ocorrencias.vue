@@ -13,7 +13,6 @@
           option(value="Arquivado") Arquivado
         select(v-model="filters.artigo" id="artigo" name="artigo")
           option(value="") Selecione o Artigo
-          // Iterar sobre os artigos e exibir o código e descrição
           option(v-for="artigo in artigos" :key="artigo.id" :value="artigo.id")
             | {{ artigo.codArtigo }} - {{ artigo.descricao }}
         input(type="text" v-model="filters.hora" placeholder="Hora")
@@ -36,6 +35,7 @@
             th Data
             th Descrição
             th Artigo
+            th(v-if="perfilUsuario !== 'PUBLICO'") Ações
         tbody
           tr(v-if="ocorrencias.length === 0")
             td(colspan="10" style="text-align: center;") Sem registros
@@ -50,18 +50,81 @@
             td {{ ocorrencia.dataHora }}
             td {{ ocorrencia.descricaoOcorrencia }}
             td {{ ocorrencia.artigoCodigo }} - {{ ocorrencia.artigoDescricao }}
+            td(v-if="perfilUsuario !== 'PUBLICO'" class="acoes-dropdown")
+              .dropdown
+                button(
+                  @click.stop="toggleMenu(index)"
+                  :class="{ 'active': menuAbertoIndex === index }"
+                  class="menu-button"
+                )
+                  span ● ● ●
+                .dropdown-menu(v-if="menuAbertoIndex === index")
+                  button.btn-sm(@click="abrirModalDetalhes(ocorrencia)")
+                    EyeOutlined
+                    | Ver Detalhes
+
+                  button.btn-sm(@click="abrirModalEditar(ocorrencia)")
+                    PlusOutlined
+                    | Adicionar Detalhes
+
+                  button.btn-sm(
+                    v-if="(perfilUsuario === 'POLICIAL' || perfilUsuario === 'AGENTE_DE_SEGURANCA' || perfilUsuario === 'INVESTIGADOR') && !getResponsabilidade(ocorrencia.id)"
+                    @click="abrirModalResponsavel(ocorrencia)"
+                  )
+                    EditOutlined
+                    | Responsavel
+
+
+
+
+
 
       //- Paginação à direita
       .pagination
         button(@click="changePage(currentPage - 1)" :disabled="currentPage === 0").pagination-btn Página Anterior
         span Página {{ currentPage + 1 }} de {{ totalPages }}
         button(@click="changePage(currentPage + 1)" :disabled="currentPage + 1 >= totalPages").pagination-btn Próxima Página
+
+
+      ModalDetalhes(
+        v-if="modalDetalhesAberto"
+        :ocorrencia="ocorrenciaSelecionada"
+        @close="modalDetalhesAberto = false"
+        @salvo="fetchOcorrencias"
+      )
+      ModalEditar(
+        v-if="modalEditarAberto"
+        :ocorrencia="ocorrenciaSelecionada"
+        @close="modalEditarAberto = false"
+        @salvo="fetchOcorrencias"
+      )
+      ModalResponsavel(
+        v-if="modalResponsavelAberto"
+        :ocorrencia="ocorrenciaSelecionada"
+        :userId="userId"
+        :isResponsavel="responsabilidadeParaAlterar"
+        @close="modalResponsavelAberto = false"
+        @salvo="fetchOcorrencias"
+      )
+
+
+
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { obterOcorrencias } from '@/services/ocorrenciasService'
 import { buscarArtigos } from '@/services/artigoService'
+import ModalDetalhes from '@/views/components/ModalDetalhes.vue'
+import ModalEditar from '@/views/components/ModalEditar.vue'
+import ModalResponsavel from '@/views/components/ModalResponsavel.vue'
+import {
+  verificarResponsavel,
+  assumirResponsavel,
+  desassumirResponsavel,
+} from '@/services/ocorrenciasService'
+
+import { EyeOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons-vue'
 
 const ocorrencias = ref<any[]>([])
 const artigos = ref<any[]>([]) // Para armazenar os artigos
@@ -76,12 +139,56 @@ const currentPage = ref(0)
 const totalPages = ref(1)
 const pageSize = ref(10)
 const token = localStorage.getItem('authToken')
+const perfilUsuario = ref(localStorage.getItem('userPerfil') || 'PUBLICO')
+const modalDetalhesAberto = ref(false)
+const modalEditarAberto = ref(false)
+const ocorrenciaSelecionada = ref(null)
+const modalResponsavelAberto = ref(false)
+const userId = localStorage.getItem('userId') || ''
+const responsabilidades = ref<any[]>([]) // Agora é um array para armazenar cada estado
+const responsabilidadeParaAlterar = ref(false) // Inicialmente, o usuário não é responsável.
 
+const abrirModalResponsavel = async (ocorrencia: any) => {
+  ocorrenciaSelecionada.value = ocorrencia
+  modalResponsavelAberto.value = true
+
+  // Verifica se o usuário é responsável
+  const isResponsavel = await verificarResponsavel(ocorrencia.id, userId)
+
+  // Se o usuário não for responsável, o botão mostrará "Assumir"
+  responsabilidadeParaAlterar.value = isResponsavel
+}
+
+const abrirModalDetalhes = (ocorrencia: any) => {
+  ocorrenciaSelecionada.value = ocorrencia
+  modalDetalhesAberto.value = true
+}
+
+const abrirModalEditar = (ocorrencia: any) => {
+  ocorrenciaSelecionada.value = ocorrencia
+  modalEditarAberto.value = true
+}
+const menuAbertoIndex = ref<number | null>(null)
+
+const toggleMenu = (index: number) => {
+  menuAbertoIndex.value = menuAbertoIndex.value === index ? null : index
+}
+
+// Fecha menu ao clicar fora
+document.addEventListener('click', (event) => {
+  const target = event.target as HTMLElement
+  if (!target.closest('.dropdown')) {
+    menuAbertoIndex.value = null
+  }
+})
 if (!token) {
   localStorage.setItem('loginMessage', 'Faça login.')
   window.location.href = '/login'
 }
 
+// Função para carregar as ocorrências
+// Função para carregar as ocorrências
+// Função para carregar as ocorrências
 // Função para carregar as ocorrências
 const fetchOcorrencias = async () => {
   try {
@@ -92,8 +199,20 @@ const fetchOcorrencias = async () => {
     console.error('Erro ao carregar as ocorrências:', error)
   }
 }
+const getResponsabilidade = (ocorrenciaId: string) => {
+  const responsabilidade = responsabilidades.value.find((res) => res.id === ocorrenciaId)
+  return responsabilidade ? responsabilidade.responsavel : false
+}
 
-// Função para carregar os artigos
+const verDetalhes = (ocorrencia: any) => {
+  console.log('Visualizar:', ocorrencia)
+  // Navegar para tela de detalhes ou abrir modal
+}
+
+const editarOcorrencia = (ocorrencia: any) => {
+  console.log('Editar:', ocorrencia)
+  // Redirecionar para a tela de edição com os dados
+}
 const fetchArtigos = async () => {
   try {
     const data = await buscarArtigos() // Supondo que você tenha esse serviço para pegar os artigos
@@ -151,7 +270,7 @@ onMounted(() => {
 }
 
 .filters .btn {
-  background-color: #28a745;
+  background-color: #218838;
   color: white;
   border: none;
   padding: 0.4rem 0.8rem;
@@ -228,5 +347,132 @@ onMounted(() => {
   border-radius: 6px;
   width: 200px;
   font-size: 0.875rem;
+}
+
+.btn-sm {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  margin-right: 0.5rem;
+  background-color: #218838;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-sm:hover {
+  background-color: #218838;
+}
+
+.acoes-dropdown {
+  position: relative;
+}
+
+.menu-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #218838;
+  cursor: pointer;
+  padding: 0;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  min-width: 140px;
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #333;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.dropdown-menu button:hover {
+  background-color: #218838;
+  color: white;
+}
+.menu-button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0.2rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #218838;
+}
+
+.menu-button span {
+  line-height: 0.6;
+  font-size: 1rem;
+  color: #218838;
+}
+
+.menu-button:hover,
+.menu-button.active {
+  background-color: #218838;
+}
+
+.menu-button:hover span,
+.menu-button.active span {
+  color: white;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 0.25rem 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  min-width: 160px;
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  padding: 0.4rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #333;
+  transition: background-color 0.2s ease-in-out;
+  width: 150%;
+}
+
+.dropdown-menu button:hover {
+  background-color: #218838;
+  color: white;
+}
+.btn-sm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 </style>

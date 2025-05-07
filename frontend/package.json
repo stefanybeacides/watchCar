@@ -15,9 +15,11 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
+    "ant-design-vue": "^4.0.0-rc.6",
     "axios": "^1.9.0",
     "pinia": "^3.0.1",
     "vue": "^3.5.13",

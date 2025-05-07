@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watchEffect } from 'vue'
+import { ref, computed, watchEffect, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 
@@ -8,6 +8,26 @@ const router = useRouter()
 // Ref reativa que controla o estado de autenticação
 const authToken = ref(localStorage.getItem('authToken'))
 const userName = ref(localStorage.getItem('userName') || 'Usuário')
+const perfilUsuario = ref('PUBLICO')
+
+onMounted(() => {
+  const role = localStorage.getItem('userPerfil')
+  if (role) {
+    perfilUsuario.value = role
+  }
+})
+
+const roleMap: Record<string, string> = {
+  PUBLICO: 'Público',
+  POLICIAL: 'Policial',
+  AGENTE_DE_SEGURANCA: 'Agente de Segurança',
+  INVESTIGADOR: 'Investigador',
+  GESTOR_DE_SEGURANCA_PUBLICA: 'Gestor de Segurança Pública',
+}
+
+const perfilUsuarioFormatado = computed(() => {
+  return roleMap[perfilUsuario.value] || perfilUsuario.value
+})
 
 // Computed reativo para login
 const isLoggedIn = computed(() => authToken.value !== null)
@@ -60,9 +80,12 @@ div.layout
         div.nav-buttons(v-if="!isLoggedIn")
           RouterLink.nav-button(to="/login") Login
           RouterLink.nav-button.primary(to="/register") Cadastre-se
-        div(v-if="isLoggedIn")
-          span.nav-user-name {{ userName }}
+        div(v-if="isLoggedIn" class="nav-user-wrapper")
+          div.nav-user-info
+            span.nav-user-name {{ userName }}
+            div.nav-user-role {{ perfilUsuarioFormatado }}
           button.nav-button.primary(@click="handleLogout") Sair
+
 
   main.main-content
     RouterView
@@ -217,5 +240,32 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.nav-user-role {
+  font-size: 0.75rem; /* menor que o nome */
+  color: #888; /* cinza */
+  margin-top: -0.25rem;
+}
+.nav-user-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* espaço entre info e botão */
+}
+
+.nav-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-user-name {
+  font-weight: bold;
+}
+
+.nav-user-role {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 0.2rem;
+  text-align: center;
 }
 </style>

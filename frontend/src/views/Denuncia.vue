@@ -71,7 +71,10 @@
                 textarea(id="descricao" v-model="descricao" required)
       template(v-if="etapa === 4")
         .step-content(:class="{'active-step': etapa === 4}")
-        p Finalize sua denúncia
+          .termo-container
+            h2 Termo de Envio de Denúncia
+            p Ao prosseguir, você confirma que as informações fornecidas são verdadeiras e que entende as implicações legais da denúncia falsa.
+
 
       .botoes
         button.btn-voltar(type="button" @click="voltar" :disabled="etapa === 1") Voltar
@@ -438,5 +441,26 @@ select {
 select:focus {
   outline: none;
   border-color: #28a745;
+}
+
+.termo-container {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: #f8f8f8;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.termo-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.termo-container p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
 }
 </style>

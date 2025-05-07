@@ -1,8 +1,6 @@
 package com.system.watchCar.controller;
 
-import com.system.watchCar.dto.DenunciaRequest;
-import com.system.watchCar.dto.LoginRequest;
-import com.system.watchCar.dto.OcorrenciaDTO;
+import com.system.watchCar.dto.*;
 import com.system.watchCar.entity.Ocorrencia;
 import com.system.watchCar.response.AuthResponse;
 import com.system.watchCar.service.OcorrenciaService;
@@ -50,5 +48,32 @@ public class OcorrenciaController {
     public ResponseEntity<Ocorrencia> criarDenuncia(@RequestBody DenunciaRequest request) {
         Ocorrencia ocorrenciaCriada = ocorrenciaService.criarDenuncia(request);
         return ResponseEntity.ok(ocorrenciaCriada);
+    }
+
+    @GetMapping("/ocorrencias/{id}")
+    public ResponseEntity<OcorrenciaDetalhadaResponse> detalharOcorrencia(@PathVariable Long id) {
+        OcorrenciaDetalhadaResponse response = ocorrenciaService.buscarDetalhesPorId(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/responsavel")
+    public ResponseEntity<ResponsavelResponse> verificarResponsavel(
+            @PathVariable Long id, @RequestParam String usuarioId) {
+        boolean isResponsavel = ocorrenciaService.verificarResponsavel(id, usuarioId);
+        return ResponseEntity.ok(new ResponsavelResponse(isResponsavel));
+    }
+
+    @PutMapping("/{id}/assumir")
+    public ResponseEntity<String> assumirResponsavel(
+            @PathVariable Long id, @RequestBody UsuarioRequest usuarioRequest) {
+        ocorrenciaService.assumirResponsavel(id, String.valueOf(usuarioRequest.getUsuarioId()));
+        return ResponseEntity.ok("Responsabilidade assumida com sucesso");
+    }
+
+    @PutMapping("/{id}/desassumir")
+    public ResponseEntity<String> desassumirResponsavel(
+            @PathVariable Long id, @RequestBody UsuarioRequest usuarioRequest) {
+        ocorrenciaService.desassumirResponsavel(id, String.valueOf(usuarioRequest.getUsuarioId()));
+        return ResponseEntity.ok("Responsabilidade desassumida com sucesso");
     }
 }

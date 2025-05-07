@@ -3,6 +3,7 @@ package com.system.watchCar.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -23,5 +24,10 @@ public class Responsavel {
 
     private String numDistintivo;
     private String delegacia;
+    private Long status;
+
+    @Column(name = "DATA_CRIACAO", nullable = false, updatable = false)
+    private LocalDateTime dataCriacao;
+
 }
 

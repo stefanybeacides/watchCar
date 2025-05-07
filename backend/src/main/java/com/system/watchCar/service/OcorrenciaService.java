@@ -4,15 +4,22 @@ import javax.persistence.criteria.Predicate;
 
 import com.system.watchCar.dto.DenunciaRequest;
 import com.system.watchCar.dto.OcorrenciaDTO;
+import com.system.watchCar.dto.OcorrenciaDetalhadaResponse;
+import com.system.watchCar.dto.ResponsavelResponse;
 import com.system.watchCar.entity.*;
 import com.system.watchCar.repository.*;
 import org.springframework.data.domain.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -134,6 +141,14 @@ public class OcorrenciaService {
         ocorrencia.setCodArtigo(request.getArtigoLei());
         ocorrencia = repository.save(ocorrencia);
 
+        Responsavel responsavel = new Responsavel();
+        responsavel.setDenuncia(ocorrencia);
+        responsavel.setUsuario(usuario);
+        responsavel.setNumDistintivo(usuario.getBadge());
+        responsavel.setDelegacia(usuario.getDelegate());
+        responsavel.setDataCriacao(LocalDateTime.now());
+        responsavelRepository.save(responsavel);
+
         // 6. Se o usuário tiver distintivo e delegacia, cria um responsável
         if (usuario.getBadge() != null && usuario.getDelegate() != null) {
             Responsavel resp = new Responsavel();
@@ -152,6 +167,118 @@ public class OcorrenciaService {
         // Validar que o status está dentro dos valores possíveis
         return "Em andamento".equals(status) || "Solucionado".equals(status) || "Arquivado".equals(status);
     }
+
+    public OcorrenciaDetalhadaResponse buscarDetalhesPorId(Long id) {
+        Ocorrencia ocorrencia = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ocorrência não encontrada"));
+
+        User usuario = userRepository.findById(ocorrencia.getIdUsuario())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        Veiculo veiculo = veiculoRepository.findById(ocorrencia.getIdVeiculo())
+                .orElseThrow(() -> new RuntimeException("Veículo não encontrado"));
+
+        // Responsável atual (último a assumir)
+        Optional<Responsavel> responsavelAtual = responsavelRepository.findTopByDenunciaIdOrderByDataCriacaoDesc(id);
+
+        // Histórico de responsáveis
+        List<Responsavel> historico = responsavelRepository.findByDenunciaIdOrderByDataCriacaoDesc(id);
+        List<OcorrenciaDetalhadaResponse.ResponsavelHistoricoDto> historicoDtos = historico.stream().map(r ->
+                new OcorrenciaDetalhadaResponse.ResponsavelHistoricoDto(r.getUsuario().getUsername(), r.getDataCriacao(), r.getNumDistintivo(), r.getDelegacia())
+        ).collect(Collectors.toList());
+
+        OcorrenciaDetalhadaResponse response = new OcorrenciaDetalhadaResponse();
+        response.setId(ocorrencia.getId());
+        response.setUsuarioNome(usuario.getUsername());
+        response.setVeiculoPlaca(veiculo.getPlaca());
+        response.setVeiculoModelo(veiculo.getTipoVeiculo().getModelo());
+        response.setStatusDenuncia(ocorrencia.getStatusDenuncia());
+        response.setResponsavelId(responsavelAtual.map(r -> r.getUsuario().getId()).orElse(null));
+        response.setHistoricoResponsaveis(historicoDtos);
+
+        return response;
+    }
+
+    public boolean verificarResponsavel(Long id, String usuarioId) {
+        // Recupera a ocorrência pelo id
+        Ocorrencia ocorrencia = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ocorrência não encontrada"));
+
+        // Converte o usuarioId para Long
+        Long usuarioIdLong = Long.valueOf(usuarioId);
+
+        // Busca o responsável ativo pelo id do usuário e status igual a 1
+        Responsavel responsavel = responsavelRepository.findByUsuarioIdAndStatusAndDenunciaId(usuarioIdLong, 1L, ocorrencia.getId());
+
+        // Verifica se o responsável foi encontrado e está com status 1
+        if (responsavel != null) {
+            return true; // O usuário é o responsável
+        } else {
+            return false; // O usuário não é o responsável
+        }
+    }
+
+    @Transactional
+    public void assumirResponsavel(Long id, String usuarioId) {
+        // Verifica se o usuário já é responsável pela ocorrência
+        if (verificarResponsavel(id, usuarioId)) {
+            throw new RuntimeException("Este usuário já é responsável por esta ocorrência.");
+        }
+
+        // Recupera a ocorrência
+        Ocorrencia ocorrencia = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ocorrência não encontrada"));
+        User user = userRepository.findById(Long.valueOf(usuarioId))
+                .orElseThrow(() -> new RuntimeException("Ocorrência não encontrada"));
+
+        // Desativa qualquer outro responsável anterior no histórico
+        responsavelRepository.updateStatusPorOcorrenciaEUsuario(ocorrencia.getId(), user.getId(), Long.valueOf(0));
+
+        // Recupera o responsável pela ID do usuário
+        Responsavel responsavel = new Responsavel();
+        responsavel.setUsuario(user);
+        responsavel.setStatus(Long.valueOf(1)); // Marca como responsável ativo
+        responsavel.setDenuncia(ocorrencia); // Associa a ocorrência ao responsável
+        responsavel.setDelegacia(user.getDelegate());
+        responsavel.setNumDistintivo(user.getBadge());
+        responsavel.setDataCriacao(LocalDateTime.now()); // Data atual
+
+        // Salva o novo responsável no histórico (ou atualiza, se necessário)
+        responsavelRepository.save(responsavel);
+    }
+    @Transactional
+    public void desassumirResponsavel(Long id, String usuarioId) {
+        // Verifica se o usuário é o responsável pela ocorrência
+        if (!verificarResponsavel(id, usuarioId)) {
+            throw new RuntimeException("Este usuário não é o responsável por esta ocorrência.");
+        }
+
+        // Recupera a ocorrência pelo ID
+        Ocorrencia ocorrencia = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ocorrência não encontrada"));
+
+        // Busca o responsável ativo (com status = 1) para a ocorrência
+        Responsavel responsavel = responsavelRepository.findByUsuarioIdAndStatusAndDenunciaId(Long.valueOf(usuarioId), 1L, ocorrencia.getId());
+
+        if (responsavel == null) {
+            throw new RuntimeException("Responsável não encontrado com status ativo.");
+        }
+
+        // Desativa o responsável atual no histórico (Status = 0)
+        responsavel.setStatus(0L); // Marca como não ativo
+        responsavel.setDataCriacao(LocalDateTime.now()); // Atualiza a data de criação (pode ser necessário se quiser gravar a alteração)
+
+        // Salva a alteração no responsável
+        responsavelRepository.save(responsavel);
+
+        // Remove o responsável da ocorrência
+        ocorrencia.setIdResponsavel(null);
+        repository.save(ocorrencia); // Salva a ocorrência com o responsável removido
+    }
+
+
+
+
 
 }
 

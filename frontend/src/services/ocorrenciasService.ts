@@ -69,7 +69,7 @@ export const contarOcorrencias = async (filters: {
   }
 
   try {
-    const url = `/api/listar/ocorrencias/count?status=${filters.status}&artigo=${filters.artigo}&hora=${filters.hora}&dataInicio=${filters.dataInicio}&dataFim=${filters.dataFim}`
+    const url = `/listar/ocorrencias/count?status=${filters.status}&artigo=${filters.artigo}&hora=${filters.hora}&dataInicio=${filters.dataInicio}&dataFim=${filters.dataFim}`
 
     const response = await api.get(url, {
       headers: {
@@ -80,6 +80,105 @@ export const contarOcorrencias = async (filters: {
     return response.data // Retorna o total de ocorrências
   } catch (error) {
     console.error('Erro ao contar ocorrências:', error)
+    throw error
+  }
+}
+
+// Função para buscar uma ocorrência detalhada por ID
+export const obterOcorrenciaPorId = async (id: number) => {
+  const token = getAuthToken()
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado')
+  }
+
+  try {
+    const response = await api.get(`/ocorrencias/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return response.data
+  } catch (error) {
+    console.error('Erro ao buscar ocorrência:', error)
+    throw error
+  }
+}
+// Função para verificar se o usuário é o responsável da ocorrência
+export const verificarResponsavel = async (ocorrenciaId: number, usuarioId: string) => {
+  const token = getAuthToken()
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado')
+  }
+
+  try {
+    // Ajusta a URL conforme a sua solicitação
+    const response = await api.get(`http://localhost:8080/api/${ocorrenciaId}/responsavel`, {
+      params: {
+        usuarioId: usuarioId,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return response.data.responsavel // Retorna os dados da resposta, ajustando conforme necessário
+  } catch (error) {
+    console.error('Erro ao verificar responsável:', error)
+    throw error
+  }
+}
+
+// Função para assumir a responsabilidade pela ocorrência
+export const assumirResponsavel = async (ocorrenciaId: number, usuarioId: string) => {
+  const token = getAuthToken()
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado')
+  }
+
+  try {
+    const response = await api.put(
+      `/${ocorrenciaId}/assumir`,
+      { usuarioId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
+
+    return response.data
+  } catch (error) {
+    console.error('Erro ao assumir responsabilidade:', error)
+    throw error
+  }
+}
+
+// Função para desassumir a responsabilidade pela ocorrência
+export const desassumirResponsavel = async (ocorrenciaId: number, usuarioId: string) => {
+  const token = getAuthToken()
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado')
+  }
+
+  try {
+    const response = await api.put(
+      `/${ocorrenciaId}/desassumir`,
+      { usuarioId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
+
+    return response.data
+  } catch (error) {
+    console.error('Erro ao desassumir responsabilidade:', error)
     throw error
   }
 }
