@@ -43,6 +43,23 @@
             span {{ ocorrencia.veiculoPlaca }}
 
         .section
+          h3 Ações de Investigação
+          ul.acaoinvestigacao-list(v-if="acoes.length")
+            li(v-for="(acao, index) in acoes" :key="index")
+              span.tipo Tipo: {{ acao.tipoAcao }}
+              br
+              span.descricao Descrição: {{ acao.descricaoAcao }}
+              br
+              span.data Data: {{ new Date(acao.dataAcao).toLocaleString('pt-BR') }}
+              br
+              span.responsavel Responsável: {{ acao.nomeResponsavel }}
+              br
+              span.distintivo Distintivo: {{ acao.distintivoResponsavel }}
+              br
+              span.delegacia Delegacia: {{ acao.delegaciaResponsavel }}
+          p(v-else) Nenhuma ação de investigação registrada.
+
+        .section
           h3 Histórico de Responsáveis
           ul.historico-list
             li(v-for="(item, index) in historico" :key="index")
@@ -53,10 +70,6 @@
               span.distintivo Distintivo: {{ item.distintivo || 'Não informado' }}
               br
               span.delegacia Delegacia: {{ item.delegacia || 'Não informada' }}
-
-
-
-        // Exibe se o usuário é responsável ou não
         p.responsavel-status(v-if="isResponsavel")
           strong Você já é responsável por esta ocorrência.
         p.responsavel-status(v-else)
@@ -67,6 +80,7 @@
           | {{ isResponsavel ? 'Desassumir' : 'Assumir' }}
         button.btn-sm(@click="close") Cancelar
 </template>
+
 <script setup lang="ts">
 import { defineProps, defineEmits, onMounted, ref, watch } from 'vue'
 import {
@@ -74,6 +88,7 @@ import {
   assumirResponsavel,
   desassumirResponsavel,
 } from '@/services/ocorrenciasService'
+import { fetchUserData } from '@/services/authService'
 
 const props = defineProps({
   ocorrencia: {
@@ -89,22 +104,28 @@ const props = defineProps({
     required: true,
   },
 })
-const emit = defineEmits(['close', 'salvo'])
 
-const historico = ref<{ nome: string; data: string | null }[]>([])
+const emit = defineEmits(['close', 'salvo'])
+const historico = ref<
+  { nome: string; data: string | null; distintivo: string; delegacia: string }[]
+>([])
+const acoes = ref<any[]>([])
 
 const carregarHistorico = async () => {
   try {
+    if (!props.ocorrencia) {
+      throw new Error('Ocorrência não encontrada.')
+    }
+
     const resposta = await obterOcorrenciaPorId(props.ocorrencia.id)
+    console.log('Resposta da API:', resposta)
+
+    acoes.value = resposta.acoesInvestigacao || []
     historico.value = resposta.historicoResponsaveis || []
   } catch (error) {
-    console.error('Erro ao carregar histórico de responsáveis:', error)
+    console.error('Erro ao carregar dados da ocorrência:', error)
   }
 }
-
-onMounted(carregarHistorico)
-
-watch(() => props.ocorrencia.id, carregarHistorico)
 
 const confirmarAcao = async () => {
   try {
@@ -123,6 +144,10 @@ const confirmarAcao = async () => {
 const close = () => {
   emit('close')
 }
+
+onMounted(carregarHistorico)
+
+watch(() => props.ocorrencia.id, carregarHistorico)
 </script>
 
 <style scoped>
@@ -226,6 +251,12 @@ const close = () => {
   padding-bottom: 1rem;
 }
 
+/* Remove linha superior se necessário */
+.section.no-border-top {
+  border-top: none;
+  margin-top: -1rem; /* aproxima visualmente */
+}
+
 .section h3 {
   margin-bottom: 0.75rem;
   font-size: 1rem;
@@ -274,30 +305,114 @@ const close = () => {
   text-align: center;
 }
 
+.acaoinvestigacao-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.acaoinvestigacao-list li {
+  flex-direction: column;
+  border-bottom: 1px solid #ddd; /* Separador sutil entre ações */
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.acaoinvestigacao-list li:last-child {
+  border-bottom: none; /* Remove a borda do último item */
+}
+
+.acaoinvestigacao-list span {
+  display: inline-block;
+  margin-bottom: 3px; /* Ajustar o espaço entre os itens */
+  color: #333;
+}
+
+.acaoinvestigacao-list .tipo {
+  font-weight: 600; /* Negrito */
+  color: #218838; /* Verde */
+}
+
+.acaoinvestigacao-list .nome {
+  font-weight: 600;
+  color: #218838; /* Um verde mais suave para o tipo da ação */
+}
+
+.acaoinvestigacao-list .descricao,
+.acaoinvestigacao-list .data {
+  margin-bottom: 3px; /* Ajustar o espaçamento entre esses itens */
+  font-size: 0.875rem; /* Menor tamanho para descrição e data */
+  color: #555;
+}
+
+.acaoinvestigacao-list .responsavel {
+  font-weight: bold;
+  color: #333;
+  margin-top: 3px; /* Menor espaço entre responsável e os outros itens */
+  font-size: 0.9rem;
+}
+
+.acaoinvestigacao-list .distintivo,
+.acaoinvestigacao-list .delegacia {
+  font-size: 0.875rem;
+  color: #555;
+  margin-bottom: 3px;
+}
+
+.acaoinvestigacao-list .distintivo {
+  font-weight: bold;
+}
+
+.acaoinvestigacao-list .delegacia {
+  font-style: italic;
+}
+
 .historico-list {
   list-style: none;
   padding-left: 0;
+  margin: 0;
 }
 
 .historico-list li {
+  flex-direction: column;
   padding: 0.5rem 0;
   border-bottom: 1px solid #ddd;
-  font-size: 0.875rem;
+  margin-bottom: 10px;
+}
+
+.historico-list li:last-child {
+  border-bottom: none; /* Remove a borda do último item */
 }
 
 .historico-list span {
-  display: block;
-  margin-bottom: 2px;
+  display: inline-block;
+  margin-bottom: 3px; /* Ajuste do espaço entre os itens */
   color: #333;
 }
 
 .historico-list .nome {
   font-weight: 600;
-  color: #555;
+  color: #218838; /* Um verde mais suave para o nome */
 }
 
 .historico-list .data {
-  color: #333;
+  font-size: 0.875rem; /* Tamanho reduzido para a data */
+  color: #555;
+  margin-bottom: 3px; /* Ajustar o espaçamento */
+}
+
+.historico-list .distintivo,
+.historico-list .delegacia {
+  font-size: 0.875rem;
+  color: #555;
+  margin-bottom: 3px;
+}
+
+.historico-list .distintivo {
+  font-weight: bold;
+}
+
+.historico-list .delegacia {
   font-style: italic;
 }
 </style>

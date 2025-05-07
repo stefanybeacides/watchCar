@@ -57,7 +57,8 @@
                   :class="{ 'active': menuAbertoIndex === index }"
                   class="menu-button"
                 )
-                  span ● ● ●
+                  span 
+                    i.fa-solid.fa-plus
                 .dropdown-menu(v-if="menuAbertoIndex === index")
                   button.btn-sm(@click="abrirModalDetalhes(ocorrencia)")
                     EyeOutlined
@@ -89,9 +90,11 @@
       ModalDetalhes(
         v-if="modalDetalhesAberto"
         :ocorrencia="ocorrenciaSelecionada"
+        :acoesInvestigacao="ocorrenciaSelecionada.acoesInvestigacao"
         @close="modalDetalhesAberto = false"
         @salvo="fetchOcorrencias"
       )
+
       ModalEditar(
         v-if="modalEditarAberto"
         :ocorrencia="ocorrenciaSelecionada"
@@ -291,10 +294,6 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-.table-wrapper {
-  overflow-x: auto;
-}
-
 .ocorrencias-table {
   width: 100%;
   border-collapse: collapse;
@@ -368,15 +367,6 @@ onMounted(() => {
   position: relative;
 }
 
-.menu-button {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  color: #218838;
-  cursor: pointer;
-  padding: 0;
-}
-
 .dropdown-menu {
   position: absolute;
   right: 0;
@@ -401,6 +391,7 @@ onMounted(() => {
   font-size: 0.875rem;
   color: #333;
   transition: background-color 0.2s ease-in-out;
+  min-width: 180px;
 }
 
 .dropdown-menu button:hover {
@@ -452,23 +443,6 @@ onMounted(() => {
   flex-direction: column;
   z-index: 1000;
   min-width: 160px;
-}
-
-.dropdown-menu button {
-  background: none;
-  border: none;
-  padding: 0.4rem 1rem;
-  text-align: left;
-  cursor: pointer;
-  font-size: 0.8rem;
-  color: #333;
-  transition: background-color 0.2s ease-in-out;
-  width: 150%;
-}
-
-.dropdown-menu button:hover {
-  background-color: #218838;
-  color: white;
 }
 .btn-sm {
   display: flex;

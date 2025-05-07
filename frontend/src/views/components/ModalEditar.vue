@@ -52,12 +52,13 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { enviarDenuncia } from '@/services/ocorrenciasService'
+import { enviarAcaoInvestigacao } from '@/services/ocorrenciasService'
 import { toast } from 'vue3-toastify'
 
 const props = defineProps({
   ocorrencia: Object,
 })
+
 const emit = defineEmits(['close', 'salvo'])
 
 const novoDetalhe = ref({
@@ -74,26 +75,41 @@ watch(
 )
 
 const salvar = async () => {
-  if (!novoDetalhe.value.tipoAcao || !novoDetalhe.value.descricaoAcao) {
-    toast.warning('Preencha todos os campos.')
+  const { tipoAcao, descricaoAcao } = novoDetalhe.value || {}
+
+  if (!tipoAcao?.trim() || !descricaoAcao?.trim()) {
+    toast.warning('Preencha todos os campos obrigatórios.')
+    return
+  }
+
+  const userId = parseInt(localStorage.getItem('userId') || '0', 10)
+
+  if (!userId || isNaN(userId)) {
+    toast.error('Usuário não identificado.')
+    return
+  }
+  if (!props.ocorrencia) {
+    toast.error('Dados da ocorrência não disponíveis.')
     return
   }
 
   const payload = {
     idDenuncia: props.ocorrencia.id,
-    tipoAcao: novoDetalhe.value.tipoAcao,
-    descricaoAcao: novoDetalhe.value.descricaoAcao,
+    tipoAcao: tipoAcao.trim(),
+    descricaoAcao: descricaoAcao.trim(),
     dataAcao: new Date().toISOString(),
-    idResponsavel: localStorage.getItem('userId') || 0,
+    idResponsavel: userId,
   }
 
   try {
-    await enviarDenuncia(payload)
-    toast.success('Detalhe salvo com sucesso.')
+    await enviarAcaoInvestigacao(payload)
+
+    toast.success('Ação registrada com sucesso.')
     emit('salvo')
     emit('close')
   } catch (err) {
-    toast.error('Erro ao salvar detalhe.')
+    console.error('Erro ao salvar ação:', err)
+    toast.error('Erro ao salvar ação de investigação.')
   }
 }
 </script>

@@ -41,4 +41,7 @@ public class Ocorrencia {
     @Column(name = "HORA_OCORRENCIA")
     private String horaOcorrencia;
 
+    @Column(name = "ALERTA")
+    private Long alerta;
+
 }

@@ -4,6 +4,7 @@ import com.system.watchCar.dto.RegisterRequest;
 import com.system.watchCar.entity.RoleType;
 import com.system.watchCar.entity.Role;
 import com.system.watchCar.entity.User;
+import com.system.watchCar.enums.TipoTemplateEmail;
 import com.system.watchCar.repository.RoleRepository;
 import com.system.watchCar.repository.UserRepository;
 import com.system.watchCar.security.JwtTokenUtil;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -27,13 +30,15 @@ public class AuthenticationService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final RoleRepository roleRepository;
+    private final EmailService emailService;
 
     @Autowired
-    public AuthenticationService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil, RoleRepository roleRepository) {
+    public AuthenticationService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil, RoleRepository roleRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenUtil = jwtTokenUtil;
         this.roleRepository = roleRepository;
+        this.emailService = emailService;
     }
 
     public String authenticate(String username, String password) {
@@ -127,8 +132,42 @@ public class AuthenticationService {
 
             // Salvando o usuário no banco
             userRepository.save(newUser);
+
+            // Criando o mapa de dados para enviar no email
+            Map<String, Object> dados = new HashMap<>();
+            Map<String, Object> usuario = new HashMap<>();
+
+            // Informações gerais do usuário
+            usuario.put("nome", registerRequest.getUsername());
+            usuario.put("email", registerRequest.getEmail());
+            usuario.put("cpf", registerRequest.getCpf());
+            usuario.put("tipo", registerRequest.getTipo());
+
+            // Se o usuário for Policial
+            if (registerRequest.getTipo() == 2 || registerRequest.getTipo() == 3 || registerRequest.getTipo() == 4) {
+                usuario.put("delegacia", registerRequest.getDelegacia());
+                usuario.put("distintivo", registerRequest.getDistintivo());
+                usuario.put("ra", registerRequest.getRa());
+            }
+
+            // Se o usuário for Gestor de Segurança Pública
+            if (registerRequest.getTipo() == 5) {
+                usuario.put("departamento", registerRequest.getDepartamento());
+                usuario.put("cargo", registerRequest.getCargo());
+            }
+
+            dados.put("usuario", usuario);
+
+            // Enviar e-mail de confirmação de conta criada para todos os tipos de usuário
+            emailService.enviarEmailComTemplate(
+                    registerRequest.getEmail(),  // E-mail de destino (usuário recém-criado)
+                    TipoTemplateEmail.CONTA_CRIADA,  // Template para conta criada
+                    dados
+            );
         }
     }
+
+
 
 
 

@@ -2,6 +2,7 @@
 import { ref, computed, watchEffect, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
+import Loader from '@/components/Loader.vue'
 
 const router = useRouter()
 
@@ -76,7 +77,6 @@ div.layout
         RouterLink.nav-link(to="/denuncia") Denúncia
 
       nav.nav-buttons
-      nav.nav-buttons
         div.nav-buttons(v-if="!isLoggedIn")
           RouterLink.nav-button(to="/login") Login
           RouterLink.nav-button.primary(to="/register") Cadastre-se
@@ -86,10 +86,10 @@ div.layout
             div.nav-user-role {{ perfilUsuarioFormatado }}
           button.nav-button.primary(@click="handleLogout") Sair
 
-
   main.main-content
     RouterView
-    ToastContainer  <!-- ADICIONADO AQUI! -->
+    Loader  <!-- Componente de Loader aqui -->
+    ToastContainer  <!-- Adicionado ToastContainer -->
 
   footer.footer
     p © 2025 - Todos os direitos reservados

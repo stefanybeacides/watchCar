@@ -1,8 +1,8 @@
 package com.system.watchCar.controller;
 
 import com.system.watchCar.dto.*;
+import com.system.watchCar.dto.AcaoInvestigacaoRequest;
 import com.system.watchCar.entity.Ocorrencia;
-import com.system.watchCar.response.AuthResponse;
 import com.system.watchCar.service.OcorrenciaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,14 +11,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/ocorrencias")
 public class OcorrenciaController {
 
     @Autowired
@@ -30,7 +32,7 @@ public class OcorrenciaController {
             @ApiResponse(responseCode = "400", description = "Something went wrong"),
             @ApiResponse(responseCode = "422", description = "Invalid username/password supplied")
     })
-    @GetMapping("/listar/ocorrencias")
+    @GetMapping("/listar")
     public Page<OcorrenciaDTO> listarOcorrencias(
             @RequestParam(required = false, defaultValue = "") String status,
             @RequestParam(required = false, defaultValue = "") String artigo,
@@ -50,7 +52,7 @@ public class OcorrenciaController {
         return ResponseEntity.ok(ocorrenciaCriada);
     }
 
-    @GetMapping("/ocorrencias/{id}")
+    @GetMapping("/detalhar/{id}")
     public ResponseEntity<OcorrenciaDetalhadaResponse> detalharOcorrencia(@PathVariable Long id) {
         OcorrenciaDetalhadaResponse response = ocorrenciaService.buscarDetalhesPorId(id);
         return ResponseEntity.ok(response);
@@ -76,4 +78,25 @@ public class OcorrenciaController {
         ocorrenciaService.desassumirResponsavel(id, String.valueOf(usuarioRequest.getUsuarioId()));
         return ResponseEntity.ok("Responsabilidade desassumida com sucesso");
     }
+
+    @PostMapping("/acao-investigacao")
+    public ResponseEntity<String> criarAcao(@RequestBody AcaoInvestigacaoRequest request) {
+        // Aqui você faria a chamada ao serviço ou repository para salvar no banco
+        ocorrenciaService.salvar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Ação registrada com sucesso.");
+    }
+
+    @GetMapping("/acoes-investigacao")
+    public ResponseEntity<List<AcaoInvestigacaoDetalhadaResponse>> listarAcoesComDetalhes(
+            @RequestParam Long responsavel,
+            @RequestParam Long denuncia) {
+
+        List<AcaoInvestigacaoDetalhadaResponse> acoes = ocorrenciaService
+                .listarComDetalhes(responsavel, denuncia);
+
+        return ResponseEntity.ok(acoes);
+    }
+
+
+
 }

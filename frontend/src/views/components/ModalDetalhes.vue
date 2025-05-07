@@ -33,31 +33,86 @@
             label E-mail:
             span {{ ocorrencia.usuarioEmail }}
 
+        .section
+          h3 Ações de Investigação
+          ul.acaoinvestgiacao-list(v-if="acoesInvestigacao.length")
+            li(v-for="(acao, index) in acoesInvestigacao" :key="index")
+              span.nome Tipo: {{ acao.tipoAcao }}
+              br
+              span.descricao Descrição: {{ acao.descricaoAcao }}
+              br
+              span.data Data: {{ new Date(acao.dataAcao).toLocaleString('pt-BR') }}
+              br
+              span.responsavel Responsável: {{ responsavel.username }}
+          p(v-else) Nenhuma ação de investigação registrada.
+
       footer.modal-footer
         button(@click="$emit('close')").btn-sm Fechar
 </template>
-
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { toast } from 'vue3-toastify'
+import { ref, onMounted } from 'vue'
+import { obterOcorrenciaPorId } from '@/services/ocorrenciasService'
+import { fetchUserData } from '@/services/authService' // Supondo que você tenha esse serviço para obter usuário
 
 const props = defineProps({
-  ocorrencia: Object,
+  ocorrencia: {
+    type: Object,
+    required: true, // Garantir que a prop ocorrencia será obrigatória
+  },
+  acoesInvestigacao: {
+    type: Array,
+    required: false,
+    default: () => [],
+  },
 })
+
 const emit = defineEmits(['close', 'salvo'])
 
-const novoDetalhe = ref({
-  tipoAcao: '',
-  descricaoAcao: '',
-})
+const acoesInvestigacao = ref<any[]>([]) // Para armazenar as ações de investigação
+const responsavel = ref<any>(null) // Para armazenar os dados do responsável
 
-// Quando abrir o modal, limpa campos
-watch(
-  () => props.ocorrencia,
-  () => {
-    novoDetalhe.value = { tipoAcao: '', descricaoAcao: '' }
-  },
-)
+// Função para carregar dados da ocorrência e ações de investigação
+const carregarDadosOcorrencia = async () => {
+  try {
+    // Verifica se 'ocorrencia' está definida
+    if (!props.ocorrencia) {
+      throw new Error('Ocorrência não encontrada.')
+    }
+
+    // Chama a API para obter os detalhes da ocorrência usando o ID
+    const resposta = await obterOcorrenciaPorId(props.ocorrencia.id)
+    console.log('Resposta da API:', resposta)
+
+    // Preenche as ações de investigação com a resposta da API
+    acoesInvestigacao.value = resposta.acoesInvestigacao || []
+
+    // Verifica se existe um responsável e faz a consulta para obter os dados do usuário
+    if (resposta.acoesInvestigacao && resposta.acoesInvestigacao.length > 0) {
+      const idResponsavel = resposta.acoesInvestigacao[0].idResponsavel
+      await carregarResponsavel(idResponsavel)
+    }
+  } catch (error) {
+    console.error('Erro ao carregar dados da ocorrência:', error)
+  }
+}
+
+// Função para carregar os dados do responsável
+const carregarResponsavel = async (idResponsavel: number) => {
+  try {
+    const usuario = await fetchUserData()
+    responsavel.value = usuario // Armazenando o usuário na variável `responsavel`
+  } catch (error) {
+    console.error('Erro ao carregar dados do responsável:', error)
+  }
+}
+
+// Chama a função quando o modal for montado
+onMounted(() => {
+  // Certifique-se de que a ocorrência esteja definida antes de carregar os dados
+  if (props.ocorrencia) {
+    carregarDadosOcorrencia()
+  }
+})
 </script>
 
 <style scoped>
@@ -219,5 +274,47 @@ select:focus {
   text-align: right;
   color: #333;
   word-break: break-word;
+}
+
+.acaoinvestgiacao-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.acaoinvestgiacao-list li {
+  flex-direction: column;
+  border-bottom: 1px solid #ddd; /* Separador sutil entre ações */
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.acaoinvestgiacao-list li:last-child {
+  border-bottom: none; /* Remove a borda do último item */
+}
+
+.acaoinvestgiacao-list span {
+  display: inline-block;
+  margin-bottom: 3px; /* Ajustar o espaço entre os itens */
+  color: #333;
+}
+
+.acaoinvestgiacao-list .nome {
+  font-weight: 600;
+  color: #218838; /* Um verde mais suave para o tipo da ação */
+}
+
+.acaoinvestgiacao-list .descricao,
+.acaoinvestgiacao-list .data {
+  margin-bottom: 3px; /* Ajustar o espaçamento entre esses itens */
+  font-size: 0.875rem; /* Menor tamanho para descrição e data */
+  color: #555;
+}
+
+.acaoinvestgiacao-list .responsavel {
+  font-weight: bold;
+  color: #333;
+  margin-top: 3px; /* Menor espaço entre responsável e os outros itens */
+  font-size: 0.9rem;
 }
 </style>

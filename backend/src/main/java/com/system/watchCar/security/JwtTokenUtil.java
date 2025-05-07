@@ -64,4 +64,15 @@ public class JwtTokenUtil {
     public boolean validateToken(String token) {
         return !isTokenExpired(token);
     }
+
+    public String generateRefreshToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("type", "refresh") // importante: indica que é refresh
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration * 10)) // exemplo: 10x maior
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+    }
+
 }

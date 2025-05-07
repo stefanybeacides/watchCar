@@ -18,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import javax.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class HttpSecurityConfig {
@@ -33,30 +35,27 @@ public class HttpSecurityConfig {
     // Configurar as regras de segurança HTTP
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Desabilitar CSRF (se não usar)
-        http.csrf().disable();
+        http
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .antMatchers("/api/login", "/api/register", "/api/artigos", "/api/ocorrencias/criar").permitAll()
+                .antMatchers("/h2-console/**/**").permitAll()
+                .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/configuration/**", "/webjars/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido ou expirado");
+                });
 
-        // Sem sessão - arquiteturas sem estado
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        // Configuração de permissão para URLs
-        http.authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll() // permite preflight
-                .antMatchers("/api/login").permitAll() // Permitir login sem autenticação
-                .antMatchers("/api/register").permitAll() // Permitir registro sem autenticação
-                .antMatchers("/api/user").authenticated() // Requer autenticação para acessar /user
-                .antMatchers("/h2-console/**/**").permitAll() // Permitir o acesso ao H2 Console
-                .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/configuration/**", "/webjars/**").permitAll() // Permitir Swagger sem autenticação
-                .anyRequest().authenticated(); // Qualquer outra requisição precisa de autenticação
-
-        // Página de erro em caso de acesso negado
-        http.exceptionHandling().accessDeniedPage("/login");
-
-        // Adicionando o filtro JWT
         http.addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     // Configurar WebSecurity para ignorar URLs específicas (como o Swagger e o H2 Console)
     @Bean

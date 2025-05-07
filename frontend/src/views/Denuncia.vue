@@ -29,15 +29,15 @@
           // Exibe dados pessoais apenas se não for anônimo
           .input-group(v-if="!anonimo")
             label(for="username") Nome
-            input(type="text" id="username" v-model="usuario.username" :disabled="usuarioLogado && !anonimo" readonly)
+            input(type="text" id="username" v-model="usuario.username" :disabled="anonimo || (usuarioLogado && !anonimo)" :readonly="usuarioLogado")
 
           .input-group(v-if="!anonimo")
             label(for="cpf") CPF
-            input(type="text" id="cpf" v-model="usuario.cpf" :disabled="usuarioLogado && !anonimo" readonly)
+            input(type="text" id="cpf" v-model="usuario.cpf" :disabled="anonimo || (usuarioLogado && !anonimo)" :readonly="usuarioLogado")
 
           .input-group(v-if="!anonimo")
             label(for="email") E-mail
-            input(type="email" id="email" v-model="usuario.email" :disabled="usuarioLogado && !anonimo" readonly)
+            input(type="email" id="email" v-model="usuario.email" :disabled="anonimo || (usuarioLogado && !anonimo)" :readonly="usuarioLogado")
 
       template(v-if="etapa === 2")
         .step-content(:class="{'active-step': etapa === 2}")
@@ -74,6 +74,16 @@
           .termo-container
             h2 Termo de Envio de Denúncia
             p Ao prosseguir, você confirma que as informações fornecidas são verdadeiras e que entende as implicações legais da denúncia falsa.
+            
+          // Exibe o checkbox para alertas se não for anônimo
+          .input-alertas(v-if="!anonimo")
+            label(for="receberAlertas") Deseja receber alertas por e-mail sobre sua denúncia?
+            .alertas-checkbox
+              input(type="checkbox" id="receberAlertas" v-model="receberAlertas")
+              span Receber alertas por e-mail
+
+
+
 
 
       .botoes
@@ -104,6 +114,7 @@ const anonimo = ref(false)
 const tipoOcorrencia = ref('')
 const artigos = ref([])
 const artigoSelecionadoId = ref(null)
+const receberAlertas = ref(true) // valor padrão: sim
 
 // Controle da etapa atual
 const etapa = ref(1)
@@ -218,6 +229,7 @@ const enviarDenuncia = async () => {
       marca: marca.value,
       cor: cor.value,
       artigoLei: artigoSelecionadoId.value,
+      receberAlertas: receberAlertas.value,
     }
 
     await enviarDenunciaService(denuncia)
@@ -232,7 +244,7 @@ const enviarDenuncia = async () => {
 // Alterna a flag de anonimato
 const toggleAnonimo = () => {
   if (anonimo.value) {
-    // Quando é anônimo, esconde os campos do usuário
+    receberAlertas.value = false
     etapa.value = 2
   } else {
     etapa.value = 1
@@ -461,6 +473,31 @@ select:focus {
 .termo-container p {
   font-size: 1rem;
   line-height: 1.5;
+  color: #333;
+}
+
+.input-alertas {
+  margin-top: 1.2rem;
+  text-align: center;
+}
+
+.alertas-checkbox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.alertas-checkbox input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  accent-color: #28a745; /* verde personalizado */
+  cursor: pointer;
+}
+
+.alertas-checkbox span {
+  font-size: 0.95rem;
   color: #333;
 }
 </style>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ação na Investigação</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8f5e9;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 650px;
+            margin: 0 auto;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+            border-left: 8px solid #2e7d32;
+        }
+
+        h2 {
+            color: #1b5e20;
+        }
+
+        p, li {
+            color: #333;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Atualização na Investigação</h2>
+
+    <p>Olá,</p>
+    <p>Houve uma nova ação na investigação referente à seguinte ocorrência:</p>
+
+    <ul>
+        <li><strong>ID:</strong> <span th:text="${ocorrencia.id}">123</span></li>
+        <li><strong>Descrição:</strong> <span th:text="${ocorrencia.descricaoOcorrencia}">Aproximação de suspeito</span></li>
+    </ul>
+
+    <p><strong>Denunciante:</strong> <span th:text="${denunciante.username}">Maria</span>
+        (<span th:text="${denunciante.email}">maria@email.com</span>)</p>
+
+    <p>Fique atento às atualizações no sistema.</p>
+
+    <div class="footer">
+        <p>Este é um e-mail automático enviado por WatchCar. Não responda.</p>
+    </div>
+</div>
+</body>
+</html>

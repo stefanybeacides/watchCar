@@ -25,6 +25,6 @@ public class DenunciaRequest {
     private String cor;
 
     private String artigoLei;
-
+    private Boolean receberAlertas;
 }
 

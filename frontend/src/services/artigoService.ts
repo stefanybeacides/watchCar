@@ -8,18 +8,8 @@ const getAuthToken = () => {
 
 // Buscar todos os artigos
 export const buscarArtigos = async () => {
-  const token = getAuthToken()
-
-  if (!token) {
-    throw new Error('Token de autenticação não encontrado')
-  }
-
   try {
-    const response = await api.get('/artigos', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const response = await api.get('/artigos', {})
     return response.data
   } catch (error) {
     console.error('Erro ao buscar artigos:', error)
