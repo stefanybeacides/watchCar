@@ -12,8 +12,9 @@ public class AcaoInvestigacao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "acao_seq")
-    @SequenceGenerator(name = "acao_seq", sequenceName = "ADS.ISEQ$$_76234", allocationSize = 1)
+    @SequenceGenerator(name = "acao_seq", sequenceName = "acao_seq", allocationSize = 1)
     private Long id;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_DENUNCIA", nullable = false)
