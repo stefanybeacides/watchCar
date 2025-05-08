@@ -152,17 +152,37 @@ onMounted(() => {
   border-radius: 8px;
   width: 90%;
   max-width: 600px;
-  padding: 1.5rem;
+  height: 90vh; /* Altura máxima visível */
+  display: flex;
+  flex-direction: column;
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden; /* Impede estouro do conteúdo */
 }
 
-/* Cabeçalho do modal */
 .modal-header {
+  flex-shrink: 0;
+  padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto; /* Aqui está o scroll */
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  flex-shrink: 0;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background-color: #fff;
 }
 
 .modal-header h2 {
