@@ -5,14 +5,18 @@ import com.system.watchCar.entity.*;
 import com.system.watchCar.enums.TipoTemplateEmail;
 import com.system.watchCar.repository.*;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +45,8 @@ public class OcorrenciaService {
         this.localRepository = localRepository;
     }
 
-
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional
     public Page<OcorrenciaDTO> obterOcorrenciasComDetalhes(String status, String artigo, String hora,
@@ -50,9 +55,8 @@ public class OcorrenciaService {
         
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        
-        Page<Ocorrencia> ocorrencias = repository.findByFilters(status, artigo, hora, dataInicio, dataFim, pageRequest);
-
+        //Page<Ocorrencia> ocorrencias = repository.findByFilters(status, artigo, hora, dataInicio, dataFim, pageRequest);
+        Page<Ocorrencia> ocorrencias = findByFilters(status, artigo, hora, dataInicio, dataFim, pageRequest);
         
         List<OcorrenciaDTO> ocorrenciasComDetalhes = ocorrencias.getContent().stream()
                 .map(ocorrencia -> {
@@ -107,6 +111,37 @@ public class OcorrenciaService {
 
         
         return new PageImpl<>(ocorrenciasComDetalhes, pageRequest, ocorrencias.getTotalElements());
+    }
+
+
+    public Page<Ocorrencia> findByFilters(String status, String artigo, String hora, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Ocorrencia> query = cb.createQuery(Ocorrencia.class);
+        Root<Ocorrencia> root = query.from(Ocorrencia.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+        if (!status.isEmpty()) {
+            predicates.add(cb.equal(root.get("statusDenuncia"), status));
+        }
+        if (!artigo.isEmpty()) {
+            predicates.add(cb.equal(root.get("codArtigo"), artigo));
+        }
+        if (!hora.isEmpty()) {
+            predicates.add(cb.equal(root.get("horaOcorrencia"), hora));
+        }
+        if (dataInicio != null) {
+            predicates.add(cb.greaterThanOrEqualTo(root.get("dataHora"), dataInicio));
+        }
+        if (dataFim != null) {
+            predicates.add(cb.lessThanOrEqualTo(root.get("dataHora"), dataFim));
+        }
+        query.select(root).where(predicates.toArray(new Predicate[0]));
+        TypedQuery<Ocorrencia> typedQuery = entityManager.createQuery(query);
+        long total = typedQuery.getResultList().size(); // Para contar o total de resultados
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        List<Ocorrencia> resultList = typedQuery.getResultList();
+        return new PageImpl<>(resultList, pageable, total);
     }
 
 
