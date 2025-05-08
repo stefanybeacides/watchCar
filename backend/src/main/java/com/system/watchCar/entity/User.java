@@ -62,4 +62,7 @@ public class User {
 
     @Column(name = "CARGO")
     private String cargo; // Para Gestor de Segurança Pública
+
+    @Column(name = "ATIVO")
+    private Boolean ativo;
 }

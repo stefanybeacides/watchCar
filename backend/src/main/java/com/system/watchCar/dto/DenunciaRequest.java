@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 public class DenunciaRequest {
 
     private Long idUsuario;
-
+    private String username;
+    private String cpf;
+    private String email;
     private String descricao;
     private String statusDenuncia;
     private String horaOcorrencia;

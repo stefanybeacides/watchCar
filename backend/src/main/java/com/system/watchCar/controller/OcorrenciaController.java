@@ -3,6 +3,8 @@ package com.system.watchCar.controller;
 import com.system.watchCar.dto.*;
 import com.system.watchCar.dto.AcaoInvestigacaoRequest;
 import com.system.watchCar.entity.Ocorrencia;
+import com.system.watchCar.entity.User;
+import com.system.watchCar.service.AuthenticationService;
 import com.system.watchCar.service.OcorrenciaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +15,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -25,6 +29,9 @@ public class OcorrenciaController {
 
     @Autowired
     private final OcorrenciaService ocorrenciaService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @Operation(summary = "Login to get JWT token", description = "Authenticate user and return JWT token")
     @ApiResponses(value = {
@@ -41,8 +48,10 @@ public class OcorrenciaController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        String username = getCurrentUsername();
+        User user = authenticationService.getUserDetails(username);
 
-        return ocorrenciaService.obterOcorrenciasComDetalhes(status, artigo, hora, dataInicio, dataFim, page, size);
+        return ocorrenciaService.obterOcorrenciasComDetalhes(user, status, artigo, hora, dataInicio, dataFim, page, size);
     }
 
 
@@ -97,6 +106,15 @@ public class OcorrenciaController {
         return ResponseEntity.ok(acoes);
     }
 
+    private String getCurrentUsername() {
+        // Obtém a autenticação atual do SecurityContextHolder
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        } else {
+            return null;
+        }
+    }
 
 }

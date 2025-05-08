@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,8 +57,6 @@ public class AuthenticationService {
         Optional<User> userOpt = userRepository.findByCpf(cpf);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            System.out.println("Senha fornecida: " + password);
-            System.out.println("Senha armazenada no banco: " + user.getPassword());
             if (passwordEncoder.matches(password, user.getPassword())) {
                 return jwtTokenUtil.generateToken(user);
             }
@@ -66,110 +65,93 @@ public class AuthenticationService {
     }
 
     public void register(RegisterRequest registerRequest) {
-        // Codificando a senha antes de salvar
         String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
+        Optional<User> existingUserOpt = userRepository.findByCpf(registerRequest.getCpf());
 
-        // Verificando se o usuário já existe com base no CPF
-        Optional<User> user = userRepository.findByCpf(registerRequest.getCpf());
-        if (user.isPresent()) {
-            throw new RuntimeException("Usuário já existe");
+        User user;
+
+        if (existingUserOpt.isPresent()) {
+            user = existingUserOpt.get();
+
+            if (Boolean.TRUE.equals(user.getAtivo())) {
+                throw new RuntimeException("Usuário já registrado e ativo.");
+            }
+
+            // Reativar usuário
+            user.setAtivo(true);
         } else {
-            // Criando um novo usuário
-            User newUser = new User();
-            newUser.setUsername(registerRequest.getUsername());
-            newUser.setPassword(encodedPassword);
-            newUser.setEmail(registerRequest.getEmail());
-            newUser.setCpf(registerRequest.getCpf());
-
-            // Determinando o tipo de usuário e a role associada
-            RoleType roleType;
-            switch (registerRequest.getTipo()) {
-                case 1: // Cidadão
-                    roleType = RoleType.PUBLICO;
-                    break;
-                case 2: // Policial
-                    roleType = RoleType.POLICIAL;
-                    break;
-                case 3: // Agente de Segurança
-                    roleType = RoleType.AGENTE_DE_SEGURANCA;
-                    break;
-                case 4: // Investigador
-                    roleType = RoleType.INVESTIGADOR;
-                    break;
-                case 5: // Gestor de Segurança Pública
-                    roleType = RoleType.GESTOR_DE_SEGURANCA_PUBLICA;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Tipo de usuário inválido.");
-            }
-            Role role = roleRepository.findByName(roleType)
-                    .orElseThrow(() -> new RuntimeException("Papel não encontrado: " + roleType));
-            newUser.setRole(role);
-
-            // Adicionando campos adicionais com base no tipo de usuário
-            if (registerRequest.getTipo() == 2 || registerRequest.getTipo() == 3 || registerRequest.getTipo() == 4) {
-                // Se o tipo de usuário for Policial, Agente de Segurança ou Investigador
-                if (registerRequest.getDelegacia() == null || registerRequest.getDistintivo() == null || registerRequest.getRa() == null) {
-                    throw new IllegalArgumentException("Campos adicionais (delegacia, distintivo, RA) são obrigatórios para este tipo de usuário.");
-                }
-
-                // Setando os campos específicos para policial
-                newUser.setDelegate(registerRequest.getDelegacia());
-                newUser.setBadge(registerRequest.getDistintivo());
-                newUser.setRa(registerRequest.getRa());
-            }
-
-            if (registerRequest.getTipo() == 5) {
-                // Se o tipo de usuário for Gestor de Segurança Pública
-                if (registerRequest.getDepartamento() == null || registerRequest.getCargo() == null) {
-                    throw new IllegalArgumentException("Campos adicionais (departamento, cargo) são obrigatórios para este tipo de usuário.");
-                }
-
-                // Setando os campos específicos para gestor
-                newUser.setDepartamento(registerRequest.getDepartamento());
-                newUser.setCargo(registerRequest.getCargo());
-            }
-
-            // Salvando o usuário no banco
-            userRepository.save(newUser);
-
-            // Criando o mapa de dados para enviar no email
-            Map<String, Object> dados = new HashMap<>();
-            Map<String, Object> usuario = new HashMap<>();
-
-            // Informações gerais do usuário
-            usuario.put("nome", registerRequest.getUsername());
-            usuario.put("email", registerRequest.getEmail());
-            usuario.put("cpf", registerRequest.getCpf());
-            usuario.put("tipo", registerRequest.getTipo());
-
-            // Se o usuário for Policial
-            if (registerRequest.getTipo() == 2 || registerRequest.getTipo() == 3 || registerRequest.getTipo() == 4) {
-                usuario.put("delegacia", registerRequest.getDelegacia());
-                usuario.put("distintivo", registerRequest.getDistintivo());
-                usuario.put("ra", registerRequest.getRa());
-            }
-
-            // Se o usuário for Gestor de Segurança Pública
-            if (registerRequest.getTipo() == 5) {
-                usuario.put("departamento", registerRequest.getDepartamento());
-                usuario.put("cargo", registerRequest.getCargo());
-            }
-
-            dados.put("usuario", usuario);
-
-            // Enviar e-mail de confirmação de conta criada para todos os tipos de usuário
-            emailService.enviarEmailComTemplate(
-                    registerRequest.getEmail(),  // E-mail de destino (usuário recém-criado)
-                    TipoTemplateEmail.CONTA_CRIADA,  // Template para conta criada
-                    dados
-            );
+            user = new User();
+            user.setCpf(registerRequest.getCpf());
+            user.setAtivo(true); // novo usuário já vem ativo
         }
+
+        // Dados comuns (usado em criação ou reativação)
+        user.setUsername(registerRequest.getUsername());
+        user.setPassword(encodedPassword);
+        user.setEmail(registerRequest.getEmail());
+
+        // Papel (role) do usuário
+        RoleType roleType = switch (registerRequest.getTipo()) {
+            case 1 -> RoleType.PUBLICO;
+            case 2 -> RoleType.POLICIAL;
+            case 3 -> RoleType.AGENTE_DE_SEGURANCA;
+            case 4 -> RoleType.INVESTIGADOR;
+            case 5 -> RoleType.GESTOR_DE_SEGURANCA_PUBLICA;
+            default -> throw new IllegalArgumentException("Tipo de usuário inválido.");
+        };
+
+        Role role = roleRepository.findByName(roleType)
+                .orElseThrow(() -> new RuntimeException("Papel não encontrado: " + roleType));
+        user.setRole(role);
+
+        // Campos adicionais obrigatórios
+        if (List.of(2, 3, 4).contains(registerRequest.getTipo())) {
+            if (registerRequest.getDelegacia() == null || registerRequest.getDistintivo() == null || registerRequest.getRa() == null) {
+                throw new IllegalArgumentException("Delegacia, distintivo e RA são obrigatórios para este tipo de usuário.");
+            }
+            user.setDelegate(registerRequest.getDelegacia());
+            user.setBadge(registerRequest.getDistintivo());
+            user.setRa(registerRequest.getRa());
+        }
+
+        if (registerRequest.getTipo() == 5) {
+            if (registerRequest.getDepartamento() == null || registerRequest.getCargo() == null) {
+                throw new IllegalArgumentException("Departamento e cargo são obrigatórios para este tipo de usuário.");
+            }
+            user.setDepartamento(registerRequest.getDepartamento());
+            user.setCargo(registerRequest.getCargo());
+        }
+
+        // Salva novo ou atualizado
+        userRepository.save(user);
+
+        // Dados do e-mail
+        Map<String, Object> dados = new HashMap<>();
+        Map<String, Object> usuario = new HashMap<>();
+        usuario.put("nome", registerRequest.getUsername());
+        usuario.put("email", registerRequest.getEmail());
+        usuario.put("cpf", registerRequest.getCpf());
+        usuario.put("tipo", registerRequest.getTipo());
+
+        if (List.of(2, 3, 4).contains(registerRequest.getTipo())) {
+            usuario.put("delegacia", registerRequest.getDelegacia());
+            usuario.put("distintivo", registerRequest.getDistintivo());
+            usuario.put("ra", registerRequest.getRa());
+        }
+
+        if (registerRequest.getTipo() == 5) {
+            usuario.put("departamento", registerRequest.getDepartamento());
+            usuario.put("cargo", registerRequest.getCargo());
+        }
+
+        dados.put("usuario", usuario);
+
+        emailService.enviarEmailComTemplate(
+                registerRequest.getEmail(),
+                TipoTemplateEmail.CONTA_CRIADA,
+                dados
+        );
     }
-
-
-
-
 
     public User getUserDetails(String username) {
         return userRepository.findByUsername(username)

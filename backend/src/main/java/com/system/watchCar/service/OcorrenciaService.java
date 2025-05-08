@@ -6,6 +6,7 @@ import com.system.watchCar.enums.TipoTemplateEmail;
 import com.system.watchCar.repository.*;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
@@ -31,9 +32,11 @@ public class OcorrenciaService {
     private final AcaoInvestigacaoRepository acaoInvestigacaoRepository;
     private final EmailService emailService;
     private final LocalRepository localRepository;
+    private final RoleRepository roleRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
 
-    public OcorrenciaService(OcorrenciaRepository repository, UserRepository userRepository, TipoVeiculoRepository tipoVeiculoRepository, VeiculoRepository veiculoRepository, ResponsavelRepository responsavelRepository, ArtigoRepository artigoRepository, AcaoInvestigacaoRepository acaoInvestigacaoRepository, EmailService emailService, LocalRepository localRepository) {
+    public OcorrenciaService(OcorrenciaRepository repository, UserRepository userRepository, TipoVeiculoRepository tipoVeiculoRepository, VeiculoRepository veiculoRepository, ResponsavelRepository responsavelRepository, ArtigoRepository artigoRepository, AcaoInvestigacaoRepository acaoInvestigacaoRepository, EmailService emailService, LocalRepository localRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.userRepository = userRepository;
         this.tipoVeiculoRepository = tipoVeiculoRepository;
@@ -43,34 +46,31 @@ public class OcorrenciaService {
         this.acaoInvestigacaoRepository = acaoInvestigacaoRepository;
         this.emailService = emailService;
         this.localRepository = localRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Transactional
-    public Page<OcorrenciaDTO> obterOcorrenciasComDetalhes(String status, String artigo, String hora,
+    public Page<OcorrenciaDTO> obterOcorrenciasComDetalhes(User user, String status, String artigo, String hora,
                                                            LocalDateTime dataInicio, LocalDateTime dataFim,
                                                            int page, int size) {
-        
+
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        //Page<Ocorrencia> ocorrencias = repository.findByFilters(status, artigo, hora, dataInicio, dataFim, pageRequest);
-        Page<Ocorrencia> ocorrencias = findByFilters(status, artigo, hora, dataInicio, dataFim, pageRequest);
-        
+        // Se for usuário do tipo PUBLICO, filtra pelas ocorrências dele
+        Long idUsuario = user.getRole().getName() == RoleType.PUBLICO ? user.getId() : null;
+
+        Page<Ocorrencia> ocorrencias = findByFilters(status, artigo, hora, dataInicio, dataFim, idUsuario, pageRequest);
+
         List<OcorrenciaDTO> ocorrenciasComDetalhes = ocorrencias.getContent().stream()
                 .map(ocorrencia -> {
-                    
                     User usuario = userRepository.findById(ocorrencia.getIdUsuario()).orElse(null);
-
-                    
                     Veiculo veiculo = veiculoRepository.findById(ocorrencia.getIdVeiculo()).orElse(null);
-
-                    
                     Artigo artigoCriminal = artigoRepository.findById(Long.valueOf(ocorrencia.getCodArtigo())).orElse(null);
-
                     Local local = localRepository.findById(ocorrencia.getIdLocal().getId()).orElse(null);
-
 
                     OcorrenciaDTO dto = new OcorrenciaDTO();
                     dto.setId(ocorrencia.getId());
@@ -96,7 +96,6 @@ public class OcorrenciaService {
                         dto.setArtigoDescricao(artigoCriminal.getDescricao());
                     }
 
-                    // Preencher os dados de localização
                     if (local != null) {
                         dto.setLogradouro(local.getLogradouro());
                         dto.setBairro(local.getBairro());
@@ -109,12 +108,12 @@ public class OcorrenciaService {
                 })
                 .collect(Collectors.toList());
 
-        
         return new PageImpl<>(ocorrenciasComDetalhes, pageRequest, ocorrencias.getTotalElements());
     }
 
 
-    public Page<Ocorrencia> findByFilters(String status, String artigo, String hora, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable) {
+
+    public Page<Ocorrencia> findByFilters(String status, String artigo, String hora, LocalDateTime dataInicio, LocalDateTime dataFim, Long user, Pageable pageable) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Ocorrencia> query = cb.createQuery(Ocorrencia.class);
         Root<Ocorrencia> root = query.from(Ocorrencia.class);
@@ -128,6 +127,8 @@ public class OcorrenciaService {
         }
         if (!hora.isEmpty()) {
             predicates.add(cb.equal(root.get("horaOcorrencia"), hora));
+        }if (user != null) {
+            predicates.add(cb.equal(root.get("idUsuario"), user));
         }
         if (dataInicio != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("dataHora"), dataInicio));
@@ -147,9 +148,26 @@ public class OcorrenciaService {
 
     @Transactional
     public Ocorrencia criarDenuncia(DenunciaRequest request) {
-        
-        User usuario = userRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        User usuario;
+        if(request.getIdUsuario() != null){
+            usuario = userRepository.findById(request.getIdUsuario())
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        }else{
+            usuario = new User();
+            String encodedPassword = passwordEncoder.encode("123");
+            RoleType roleType;
+            roleType = RoleType.PUBLICO;
+            Role role = roleRepository.findByName(roleType)
+                    .orElseThrow(() -> new RuntimeException("Papel não encontrado: " + roleType));
+            usuario.setUsername(request.getUsername());
+            usuario.setCpf(request.getCpf());
+            usuario.setEmail(request.getEmail());
+            usuario.setRole(role);
+            usuario.setPassword(encodedPassword);
+            usuario.setAtivo(false);
+            usuario = userRepository.save(usuario);
+        }
+
 
         
         if (!isValidStatus(request.getStatusDenuncia())) {

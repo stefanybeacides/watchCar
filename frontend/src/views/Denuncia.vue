@@ -279,7 +279,10 @@ const enviarDenuncia = async () => {
     }
 
     const denuncia = {
-      idUsuario,
+      idUsuario: usuario.value.id || null, // Se o usuário estiver logado, pega o id, caso contrário, usa null
+      username: usuario.value.username, // Username preenchido no formulário
+      cpf: usuario.value.cpf,
+      email: usuario.value.email,
       descricao: descricao.value,
       statusDenuncia: 'Em andamento',
       horaOcorrencia: horaOcorrencia.value,
