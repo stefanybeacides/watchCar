@@ -105,7 +105,11 @@
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>1.6.9</version> <!-- Use latest version of springdoc-openapi -->
 		</dependency>
-
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.3</version>
+		</dependency>
 
 
 		<dependency>
