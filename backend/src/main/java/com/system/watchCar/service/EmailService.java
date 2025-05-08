@@ -39,7 +39,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(from);
-            helper.setTo("ticleyton@gmail.com");
+            helper.setTo("watchcarsystem@gmail.com");
             helper.setSubject(subject);
             helper.setText(html, true);
 
