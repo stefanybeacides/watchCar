@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -25,9 +26,13 @@ public interface OcorrenciaRepository extends JpaRepository<Ocorrencia, Long>, J
             "AND (:hora IS NULL OR o.horaOcorrencia = :hora) " +
             "AND (:dataInicio IS NULL OR o.dataHora >= :dataInicio) " +
             "AND (:dataFim IS NULL OR o.dataHora <= :dataFim)")
-    Page<Ocorrencia> findByFilters(String status, String artigo, String hora,
-                                   LocalDateTime dataInicio, LocalDateTime dataFim,
+    Page<Ocorrencia> findByFilters(@Param("status") String status,
+                                   @Param("artigo") String artigo,
+                                   @Param("hora") String hora,
+                                   @Param("dataInicio") LocalDateTime dataInicio,
+                                   @Param("dataFim") LocalDateTime dataFim,
                                    Pageable pageable);
+
 }
 
 

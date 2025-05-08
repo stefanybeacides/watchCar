@@ -11,9 +11,11 @@ import java.time.LocalDateTime;
 public class Ocorrencia {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // ou GenerationType.SEQUENCE se Oracle usa sequência
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ocorrencia_seq")
+    @SequenceGenerator(name = "ocorrencia_seq", sequenceName = "ISEQ$_76234", allocationSize = 1)  // Ajuste o nome da sequência conforme necessário
     @Column(name = "ID")
     private Long id;
+
 
 
     @Column(name = "ID_USUARIO")
