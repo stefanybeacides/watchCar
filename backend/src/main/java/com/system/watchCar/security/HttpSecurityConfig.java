@@ -70,8 +70,6 @@ public class HttpSecurityConfig {
                 "/h2-console/**/**" // Permitir o acesso ao H2 Console
         );
     }
-
-    // Configuração do PasswordEncoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
