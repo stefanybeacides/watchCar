@@ -22,9 +22,9 @@ public class AcaoInvestigacao {
 
     @Column(name = "TIPO_ACAO", nullable = false)
     private String tipoAcao;
-
-    @Lob
+    
     @Column(name = "DESCRICAO_ACAO", nullable = false)
+    @Basic(fetch = FetchType.EAGER)
     private String descricaoAcao;
 
     @Column(name = "DATA_ACAO", nullable = false)
