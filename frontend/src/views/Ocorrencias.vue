@@ -41,19 +41,19 @@
           tr(v-if="ocorrencias.length === 0")
             td(colspan="10" style="text-align: center;") Sem registros
           tr(v-for="(ocorrencia, index) in ocorrencias" :key="index")
-            td {{ ocorrencia.usuarioNome }}
-            td {{ ocorrencia.usuarioEmail }}
-            td {{ ocorrencia.veiculoPlaca }}
-            td {{ ocorrencia.veiculoModelo }}
-            td {{ ocorrencia.veiculoMarca }}
-            td
+            td(data-label="Usuário") {{ ocorrencia.usuarioNome }}
+            td(data-label="Email")  {{ ocorrencia.usuarioEmail }}
+            td(data-label="Placa")  {{ ocorrencia.veiculoPlaca }}
+            td(data-label="Modelo")  {{ ocorrencia.veiculoModelo }}
+            td(data-label="Marca")  {{ ocorrencia.veiculoMarca }}
+            td(data-label="Local") 
               button.btn-local(@click="abrirModalLocal(ocorrencia)")
                 span 📍 Ver Local
-            td {{ ocorrencia.statusDenuncia }}
-            td {{ ocorrencia.horaOcorrencia }}
-            td {{ formatDataHora(ocorrencia.dataHora) }}
-            td {{ ocorrencia.descricaoOcorrencia }}
-            td {{ ocorrencia.artigoCodigo }} - {{ ocorrencia.artigoDescricao }}
+            td(data-label="Status")  {{ ocorrencia.statusDenuncia }}
+            td(data-label="Hora Denuncia")  {{ ocorrencia.horaOcorrencia }}
+            td(data-label="Data e hora da ocorrencia")  {{ formatDataHora(ocorrencia.dataHora) }}
+            td(data-label="Descricao Ocorrencia")  {{ ocorrencia.descricaoOcorrencia }}
+            td(data-label="Artigo")  {{ ocorrencia.artigoCodigo }} - {{ ocorrencia.artigoDescricao }}
             td(v-if="perfilUsuario !== 'PUBLICO'" class="acoes-dropdown")
               .dropdown
                 button(
@@ -78,12 +78,6 @@
                   )
                     EditOutlined
                     | Responsavel
-
-
-
-
-
-
       //- Paginação à direita
       .pagination
         button(@click="changePage(currentPage - 1)" :disabled="currentPage === 0").pagination-btn Página Anterior
@@ -501,5 +495,96 @@ onMounted(() => {
   background-color: #218838;
   color: white;
   border-color: #218838; /* Garante que a borda também fica verde no hover */
+}
+
+@media (max-width: 768px) {
+  .ocorrencias-table,
+  .ocorrencias-table thead,
+  .ocorrencias-table tbody,
+  .ocorrencias-table th,
+  .ocorrencias-table td,
+  .ocorrencias-table tr {
+    display: block;
+  }
+
+  .ocorrencias-table thead {
+    display: none; /* Oculta o cabeçalho em telas pequenas */
+  }
+
+  .ocorrencias-table td {
+    position: relative;
+    padding-left: 50%;
+    border: none;
+    border-bottom: 1px solid #eee;
+  }
+
+  .ocorrencias-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    color: #555;
+  }
+
+  .ocorrencias-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 1rem;
+    background-color: #fff;
+  }
+}
+
+/* Tabela responsiva */
+.ocorrencias-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
+/* Títulos das colunas */
+.ocorrencias-table th,
+.ocorrencias-table td {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+/* Cabeçalhos da tabela */
+.ocorrencias-table th {
+  background-color: #f7f7f7;
+}
+
+/* Responsividade: Ajustar para telas pequenas */
+@media (max-width: 768px) {
+  /* Tabela se torna flexível e cada linha se comporta como um bloco */
+  .ocorrencias-table,
+  .ocorrencias-table td {
+    display: block;
+    width: 100%;
+  }
+
+  /* Rótulos da célula (data-label) são exibidos em cima dos valores */
+  .ocorrencias-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    color: #555;
+    text-align: left;
+  }
+
+  /* Remover bordas entre as células para um layout mais claro */
+  .ocorrencias-table td {
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Para dar espaçamento entre os elementos */
+  .ocorrencias-table td {
+    padding: 10px;
+  }
 }
 </style>
