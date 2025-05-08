@@ -20,18 +20,23 @@ public interface OcorrenciaRepository extends JpaRepository<Ocorrencia, Long>, J
     Page<Ocorrencia> findByStatusDenunciaContainingIgnoreCaseAndCodArtigoContainingIgnoreCaseAndHoraOcorrenciaContainingIgnoreCase(
             String statusDenuncia, String codArtigo, String horaOcorrencia, Pageable pageable);
 
-    @Query("SELECT o FROM Ocorrencia o " +
-            "WHERE (:status IS NULL OR o.statusDenuncia = :status) " +
-            "AND (:artigo IS NULL OR o.codArtigo = :artigo) " +
-            "AND (:hora IS NULL OR o.horaOcorrencia = :hora) " +
-            "AND (:dataInicio IS NULL OR o.dataHora >= :dataInicio) " +
-            "AND (:dataFim IS NULL OR o.dataHora <= :dataFim)")
-    Page<Ocorrencia> findByFilters(@Param("status") String status,
-                                   @Param("artigo") String artigo,
-                                   @Param("hora") String hora,
-                                   @Param("dataInicio") LocalDateTime dataInicio,
-                                   @Param("dataFim") LocalDateTime dataFim,
-                                   Pageable pageable);
+    @Query("""
+    SELECT o FROM Ocorrencia o
+    WHERE (:status IS NULL OR o.statusDenuncia = :status)
+      AND (:artigo IS NULL OR o.codArtigo = :artigo)
+      AND (:hora IS NULL OR o.horaOcorrencia = :hora)
+      AND (:dataInicio IS NULL OR o.dataHora >= :dataInicio)
+      AND (:dataFim IS NULL OR o.dataHora <= :dataFim)
+""")
+    Page<Ocorrencia> findByFilters(
+            @Param("status") String status,
+            @Param("artigo") String artigo,
+            @Param("hora") String hora,
+            @Param("dataInicio") LocalDateTime dataInicio,
+            @Param("dataFim") LocalDateTime dataFim,
+            Pageable pageable
+    );
+
 
 }
 
