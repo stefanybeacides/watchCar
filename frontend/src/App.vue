@@ -61,29 +61,47 @@ window.addEventListener('storage', () => {
   authToken.value = localStorage.getItem('authToken')
   userName.value = localStorage.getItem('userName') || 'Usuário'
 })
+
+const menuAberto = ref(false)
+
+const toggleMenu = () => {
+  menuAberto.value = !menuAberto.value
+}
+
+const fecharMenu = () => {
+  menuAberto.value = false
+}
 </script>
 
 <template lang="pug">
 div.layout
   header.navbar
     .container
+      // Logo
       img.logo(src="@/assets/logo.svg", alt="Vue logo", width="60", height="60")
 
-      nav.nav-menu
-        RouterLink.nav-link(to="/") Início
-        RouterLink.nav-link(to="/sobre") Sobre
-        RouterLink.nav-link(to="/ocorrencias") Ocorrências
-        RouterLink.nav-link(to="/denuncia") Denúncia
+      // Botão de abrir/fechar menu (visível no mobile)
+      button.menu-toggle(@click="toggleMenu")
+        i.fas(:class="menuAberto ? 'fa-times' : 'fa-bars'")
 
-      nav.nav-buttons
-        div.nav-buttons(v-if="!isLoggedIn")
-          RouterLink.nav-button(to="/login") Login
-          RouterLink.nav-button.primary(to="/register") Cadastre-se
-        div(v-if="isLoggedIn" class="nav-user-wrapper")
-          div.nav-user-info
-            span.nav-user-name {{ userName }}
-            div.nav-user-role {{ perfilUsuarioFormatado }}
-          button.nav-button.primary(@click="handleLogout") Sair
+      // Menu completo (condicional no mobile)
+      nav.nav-content(:class="{ aberto: menuAberto }")
+        nav.nav-menu
+          RouterLink.nav-link(to="/" @click="fecharMenu") Início
+          RouterLink.nav-link(to="/sobre" @click="fecharMenu") Sobre
+          RouterLink.nav-link(to="/ocorrencias" @click="fecharMenu") Ocorrências
+          RouterLink.nav-link(to="/denuncia" @click="fecharMenu") Denúncia
+
+        nav.nav-buttons
+          div(v-if="!isLoggedIn")
+            RouterLink.nav-button(to="/login" @click="fecharMenu") Login
+            RouterLink.nav-button.primary(to="/register" @click="fecharMenu") Cadastre-se
+          div(v-if="isLoggedIn" class="nav-user-wrapper")
+            div.nav-user-info
+              span.nav-user-name {{ userName }}
+              div.nav-user-role {{ perfilUsuarioFormatado }}
+            button.nav-button.primary(@click="() => { handleLogout(); fecharMenu() }") Sair
+
 
   main.main-content
     RouterView
@@ -234,11 +252,27 @@ body {
 /* Container para centralizar o conteúdo dentro do header */
 .container {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+}
+
+/* Alinhar o conteúdo do menu principal entre logo e botões */
+.nav-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  gap: 2rem;
+}
+
+/* Faz os botões ficarem à direita */
+.nav-buttons {
+  margin-left: auto;
+  display: flex;
+  gap: 1rem;
 }
 
 .nav-user-role {
@@ -266,5 +300,99 @@ body {
   color: #888;
   margin-top: 0.2rem;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .nav-menu {
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .nav-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .nav-link,
+  .nav-button {
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-user-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .footer {
+    font-size: 0.8rem;
+    padding: 1rem;
+    text-align: center;
+  }
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.nav-content {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-content {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .nav-content.aberto {
+    display: flex;
+  }
+
+  .nav-menu,
+  .nav-buttons {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-link,
+  .nav-button {
+    width: 100%;
+    text-align: left;
+  }
 }
 </style>
