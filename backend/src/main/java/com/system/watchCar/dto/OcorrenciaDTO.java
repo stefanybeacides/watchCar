@@ -24,4 +24,10 @@ public class OcorrenciaDTO {
     private Long artigoId;
     private String artigoCodigo;
     private String artigoDescricao;
+
+    private String logradouro;
+    private String bairro;
+    private String cidade;
+    private String estado;
+    private String cep;
 }

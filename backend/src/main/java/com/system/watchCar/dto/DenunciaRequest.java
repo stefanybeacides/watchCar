@@ -26,5 +26,11 @@ public class DenunciaRequest {
 
     private String artigoLei;
     private Boolean receberAlertas;
+    // Dados de localização
+    private String cep;
+    private String logradouro;
+    private String bairro;
+    private String cidade;
+    private String estado;
 }
 

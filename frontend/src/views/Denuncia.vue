@@ -8,14 +8,18 @@
         i.fas.fa-user
         | Dados Pessoais
       .step(:class="{ active: etapa === 2, completed: etapa > 2 }")
+        i.fas.fa-map-marker
+        | Local
+      .step(:class="{ active: etapa === 3, completed: etapa > 3 }")
         font-awesome-icon(:icon="['fas', 'car']" size="2x")
         | Veículo
-      .step(:class="{ active: etapa === 3, completed: etapa > 3 }")
+      .step(:class="{ active: etapa === 4, completed: etapa > 4 }")
         i.fas.fa-comment
         | Descrição
-      .step(:class="{ active: etapa === 4, completed: etapa > 4 }")
+      .step(:class="{ active: etapa === 5, completed: etapa > 5 }")
         i.fas.fa-check-circle
         | Finalizar
+
 
     .line
     form(@submit.prevent="enviarDenuncia")
@@ -38,8 +42,29 @@
           .input-group(v-if="!anonimo")
             label(for="email") E-mail
             input(type="email" id="email" v-model="usuario.email" :disabled="anonimo || (usuarioLogado && !anonimo)" :readonly="usuarioLogado")
-
       template(v-if="etapa === 2")
+        .step-content(:class="{'active-step': etapa === 2}")
+          .input-group
+            label(for="cep") CEP
+            input(type="text" id="cep" v-model="cep" required @blur="buscarEndereco")
+          
+          .input-group
+            label(for="logradouro") Logradouro
+            input(type="text" id="logradouro" v-model="logradouro" required :disabled="cep.length < 8")
+          
+          .input-group
+            label(for="bairro") Bairro
+            input(type="text" id="bairro" v-model="bairro" required :disabled="cep.length < 8")
+          
+          .input-group
+            label(for="cidade") Cidade
+            input(type="text" id="cidade" v-model="cidade" required :disabled="cep.length < 8")
+          
+          .input-group
+            label(for="estado") Estado
+            input(type="text" id="estado" v-model="estado" required :disabled="cep.length < 8")
+
+      template(v-if="etapa === 3")
         .step-content(:class="{'active-step': etapa === 2}")
               .input-group
                 label(for="artigoId") Tipo de Ocorrência
@@ -61,7 +86,7 @@
               .input-group
                 label(for="cor") Cor
                 input(type="text" id="cor" v-model="cor" required)
-      template(v-if="etapa === 3")
+      template(v-if="etapa === 4")
         .step-content(:class="{'active-step': etapa === 3}")
               .input-group
                 label(for="horaOcorrencia") Hora da Ocorrência
@@ -69,7 +94,7 @@
               .input-group
                 label(for="descricao") Descrição
                 textarea(id="descricao" v-model="descricao" required)
-      template(v-if="etapa === 4")
+      template(v-if="etapa === 5")
         .step-content(:class="{'active-step': etapa === 4}")
           .termo-container
             h2 Termo de Envio de Denúncia
@@ -88,7 +113,7 @@
 
       .botoes
         button.btn-voltar(type="button" @click="voltar" :disabled="etapa === 1") Voltar
-        button.btn-avancar(type="button" @click="proximaEtapa" :disabled="!podeAvancar") {{ etapa === 4 ? 'Enviar Denúncia' : 'Próxima Etapa' }}
+        button.btn-avancar(type="button" @click="proximaEtapa" :disabled="!podeAvancar") {{ etapa === 5 ? 'Enviar Denúncia' : 'Próxima Etapa' }}
 </template>
 
 <script setup lang="ts">
@@ -117,7 +142,7 @@ const artigoSelecionadoId = ref(null)
 const receberAlertas = ref(true) // valor padrão: sim
 
 // Controle da etapa atual
-const etapa = ref(1)
+const etapa = ref(1) // Etapa inicial 1, agora etapa 2 será para localização
 
 // Definindo os dados do usuário
 const usuario = ref({
@@ -125,6 +150,37 @@ const usuario = ref({
   username: '',
   cpf: '',
   email: '',
+})
+const cep = ref('')
+const logradouro = ref('')
+const bairro = ref('')
+const cidade = ref('')
+const estado = ref('')
+
+// Função para buscar endereço usando o CEP
+const buscarEndereco = async () => {
+  if (cep.value.length === 8) {
+    try {
+      const response = await axios.get(`https://viacep.com.br/ws/${cep.value}/json/`)
+      logradouro.value = response.data.logradouro || ''
+      bairro.value = response.data.bairro || ''
+      cidade.value = response.data.localidade || ''
+      estado.value = response.data.uf || ''
+    } catch (error) {
+      toast.error('Erro ao buscar endereço. Verifique o CEP.')
+    }
+  }
+}
+
+// Validação da etapa de localização
+const etapa2Valida = computed(() => {
+  return (
+    cep.value.length === 8 &&
+    logradouro.value.trim() !== '' &&
+    bairro.value.trim() !== '' &&
+    cidade.value.trim() !== '' &&
+    estado.value.trim() !== ''
+  )
 })
 
 const usuarioLogado = ref(false) // Controla se o usuário está logado
@@ -154,9 +210,12 @@ const buscarUsuario = async () => {
   }
 }
 
+// Controle da etapa atual
+
 // Função que altera a etapa atual
 const proximaEtapa = () => {
-  if (etapa.value < 4) {
+  if (etapa.value < 5) {
+    // Agora são 5 etapas, de 1 a 5
     etapa.value++
   } else {
     enviarDenuncia()
@@ -180,7 +239,7 @@ const etapa1Valida = computed(() => {
 })
 
 // Validação da etapa 2
-const etapa2Valida = computed(() => {
+const etapa3Valida = computed(() => {
   return (
     placa.value.trim() !== '' &&
     ano.value > 0 &&
@@ -192,7 +251,7 @@ const etapa2Valida = computed(() => {
 })
 
 // Validação da etapa 3
-const etapa3Valida = computed(() => {
+const etapa4Valida = computed(() => {
   return horaOcorrencia.value.trim() !== '' && descricao.value.trim() !== ''
 })
 
@@ -200,6 +259,8 @@ const podeAvancar = computed(() => {
   if (etapa.value === 1) return etapa1Valida.value
   if (etapa.value === 2) return etapa2Valida.value
   if (etapa.value === 3) return etapa3Valida.value
+  if (etapa.value === 4) return etapa4Valida.value
+
   return true // etapa 4
 })
 
@@ -230,6 +291,11 @@ const enviarDenuncia = async () => {
       cor: cor.value,
       artigoLei: artigoSelecionadoId.value,
       receberAlertas: receberAlertas.value,
+      cep: cep.value,
+      logradouro: logradouro.value,
+      bairro: bairro.value,
+      cidade: cidade.value,
+      estado: estado.value,
     }
 
     await enviarDenunciaService(denuncia)
@@ -261,7 +327,7 @@ onMounted(() => {
 <style scoped>
 .denuncia {
   padding: 2rem;
-  max-width: 700px;
+  max-width: 1000px;
   margin: auto;
   font-family: 'Arial', sans-serif;
   background-color: #fefefe;
@@ -273,85 +339,6 @@ h1 {
   text-align: center;
   margin-bottom: 2rem;
   color: #2c3e50;
-}
-
-/* Linha do tempo */
-.timeline {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  position: relative;
-  padding: 0 1rem;
-}
-
-.step {
-  flex: 1;
-  text-align: center;
-  padding: 0.8rem 0.5rem;
-  background-color: #e0e0e0;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  color: #555;
-  transition: all 0.3s;
-  position: relative;
-  margin: 0 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.step i {
-  font-size: 1.5rem;
-  margin-bottom: 4px;
-}
-
-.step.active {
-  background-color: #28a745;
-  color: white;
-  font-weight: bold;
-}
-
-.step.completed {
-  background-color: #28a745;
-  color: white;
-  font-weight: bold;
-}
-
-.step.completed::after {
-  content: '✔';
-  font-size: 1rem;
-  color: white;
-  position: absolute;
-  top: 8px;
-  right: 10px;
-}
-
-/* Linha entre as etapas */
-.line {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #28a745;
-  z-index: -1;
-}
-
-/* Conteúdo de cada etapa */
-.step-content {
-  margin-bottom: 2rem;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Campos de formulário */
@@ -499,5 +486,88 @@ select:focus {
 .alertas-checkbox span {
   font-size: 0.95rem;
   color: #333;
+}
+/* Linha do tempo */
+.timeline {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+  padding: 0 1rem;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 0.8rem 0.5rem;
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #555;
+  transition: all 0.3s;
+  position: relative;
+  margin: 0 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: calc(100% - 40px); /* Deixe um espaço nas laterais para não encostar nos cards */
+  height: 2px;
+  background-color: #28a745; /* Cor da linha */
+  z-index: -1;
+}
+.step:not(:last-child) .line {
+  display: block; /* Exibe a linha entre os passos */
+}
+.step:last-child .line {
+  display: none; /* Não exibe a linha após o último passo */
+}
+
+.step i {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.step.active {
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+}
+
+.step.completed {
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+}
+
+.step.completed::after {
+  content: '✔';
+  font-size: 1rem;
+  color: white;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+}
+
+/* Conteúdo de cada etapa */
+.step-content {
+  margin-bottom: 2rem;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

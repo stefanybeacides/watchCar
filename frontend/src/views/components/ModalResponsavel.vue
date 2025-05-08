@@ -31,6 +31,24 @@
             span {{ ocorrencia.artigoCodigo }} - {{ ocorrencia.artigoDescricao }}
 
         .section
+          h3 Local
+          .info-item
+            label CEP:
+            span {{ ocorrencia.cep }}
+          .info-item
+            label Logradouro:
+            span {{ ocorrencia.logradouro }}
+          .info-item
+            label Bairro:
+            span {{ ocorrencia.bairro }}
+          .info-item
+            label Cidade:
+            span {{ ocorrencia.cidade }}
+          .info-item
+            label Estado:
+            span {{ ocorrencia.estado }}
+
+        .section
           h3 Veículo
           .info-item
             label Marca:

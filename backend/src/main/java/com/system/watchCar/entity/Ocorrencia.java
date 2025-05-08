@@ -44,4 +44,7 @@ public class Ocorrencia {
     @Column(name = "ALERTA")
     private Long alerta;
 
+    @ManyToOne
+    @JoinColumn(name = "ID_LOCAL")
+    private Local idLocal;
 }

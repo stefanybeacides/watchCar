@@ -30,9 +30,10 @@
             th Placa
             th Modelo
             th Marca
+            th Local
             th Status
-            th Hora
-            th Data
+            th Hora da Ocorrência
+            th Data Registro da Ocorrência
             th Descrição
             th Artigo
             th(v-if="perfilUsuario !== 'PUBLICO'") Ações
@@ -45,9 +46,12 @@
             td {{ ocorrencia.veiculoPlaca }}
             td {{ ocorrencia.veiculoModelo }}
             td {{ ocorrencia.veiculoMarca }}
+            td
+              button.btn-local(@click="abrirModalLocal(ocorrencia)")
+                span 📍 Ver Local
             td {{ ocorrencia.statusDenuncia }}
             td {{ ocorrencia.horaOcorrencia }}
-            td {{ ocorrencia.dataHora }}
+            td {{ formatDataHora(ocorrencia.dataHora) }}
             td {{ ocorrencia.descricaoOcorrencia }}
             td {{ ocorrencia.artigoCodigo }} - {{ ocorrencia.artigoDescricao }}
             td(v-if="perfilUsuario !== 'PUBLICO'" class="acoes-dropdown")
@@ -110,6 +114,11 @@
         @salvo="fetchOcorrencias"
       )
 
+      ModalLocal(
+        v-if="modalLocalAberto"
+        :ocorrencia="ocorrenciaSelecionada"
+        @close="modalLocalAberto = false"
+      )
 
 
 </template>
@@ -121,6 +130,8 @@ import { buscarArtigos } from '@/services/artigoService'
 import ModalDetalhes from '@/views/components/ModalDetalhes.vue'
 import ModalEditar from '@/views/components/ModalEditar.vue'
 import ModalResponsavel from '@/views/components/ModalResponsavel.vue'
+import ModalLocal from '@/views/components/ModalLocal.vue'
+
 import {
   verificarResponsavel,
   assumirResponsavel,
@@ -150,6 +161,8 @@ const modalResponsavelAberto = ref(false)
 const userId = localStorage.getItem('userId') || ''
 const responsabilidades = ref<any[]>([]) // Agora é um array para armazenar cada estado
 const responsabilidadeParaAlterar = ref(false) // Inicialmente, o usuário não é responsável.
+const modalLocalAberto = ref(false)
+const ocorrenciaLocalSelecionada = ref(null)
 
 const abrirModalResponsavel = async (ocorrencia: any) => {
   ocorrenciaSelecionada.value = ocorrencia
@@ -177,6 +190,11 @@ const toggleMenu = (index: number) => {
   menuAbertoIndex.value = menuAbertoIndex.value === index ? null : index
 }
 
+const abrirModalLocal = (ocorrencia: any) => {
+  ocorrenciaSelecionada.value = ocorrencia
+  console.log('ocoo ', ocorrenciaSelecionada)
+  modalLocalAberto.value = true
+}
 // Fecha menu ao clicar fora
 document.addEventListener('click', (event) => {
   const target = event.target as HTMLElement
@@ -189,10 +207,18 @@ if (!token) {
   window.location.href = '/login'
 }
 
-// Função para carregar as ocorrências
-// Função para carregar as ocorrências
-// Função para carregar as ocorrências
-// Função para carregar as ocorrências
+const formatDataHora = (dataHora: any) => {
+  const date = new Date(dataHora)
+  return date.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+}
+
 const fetchOcorrencias = async () => {
   try {
     const data = await obterOcorrencias(filters.value, currentPage.value, pageSize.value)
@@ -448,5 +474,28 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.btn-local {
+  background-color: white;
+  color: #218838;
+  border: 1px solid #218838;
+  border-radius: 4px;
+  font-size: 0.8rem; /* tamanho do texto */
+  min-width: 100px; /* largura mínima */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+  display: flex; /* Define a exibição como flex */
+  align-items: center; /* Alinha o ícone e o texto no centro vertical */
+  gap: 0rem; /* Adiciona um pequeno espaço entre o ícone e o texto */
+  padding: 0.3rem -0rem; /* Aumenta a altura ajustando o padding vertical (topo e fundo) */
+}
+
+.btn-local:hover,
+.btn-local:focus {
+  background-color: #218838;
+  color: white;
+  border-color: #218838; /* Garante que a borda também fica verde no hover */
 }
 </style>

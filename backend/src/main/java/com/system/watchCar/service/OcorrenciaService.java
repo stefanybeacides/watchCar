@@ -26,9 +26,10 @@ public class OcorrenciaService {
     private final ArtigoRepository artigoRepository;
     private final AcaoInvestigacaoRepository acaoInvestigacaoRepository;
     private final EmailService emailService;
+    private final LocalRepository localRepository;
 
 
-    public OcorrenciaService(OcorrenciaRepository repository, UserRepository userRepository, TipoVeiculoRepository tipoVeiculoRepository, VeiculoRepository veiculoRepository, ResponsavelRepository responsavelRepository, ArtigoRepository artigoRepository, AcaoInvestigacaoRepository acaoInvestigacaoRepository, EmailService emailService) {
+    public OcorrenciaService(OcorrenciaRepository repository, UserRepository userRepository, TipoVeiculoRepository tipoVeiculoRepository, VeiculoRepository veiculoRepository, ResponsavelRepository responsavelRepository, ArtigoRepository artigoRepository, AcaoInvestigacaoRepository acaoInvestigacaoRepository, EmailService emailService, LocalRepository localRepository) {
         this.repository = repository;
         this.userRepository = userRepository;
         this.tipoVeiculoRepository = tipoVeiculoRepository;
@@ -37,6 +38,7 @@ public class OcorrenciaService {
         this.artigoRepository = artigoRepository;
         this.acaoInvestigacaoRepository = acaoInvestigacaoRepository;
         this.emailService = emailService;
+        this.localRepository = localRepository;
     }
 
 
@@ -63,7 +65,9 @@ public class OcorrenciaService {
                     
                     Artigo artigoCriminal = artigoRepository.findById(Long.valueOf(ocorrencia.getCodArtigo())).orElse(null);
 
-                    
+                    Local local = localRepository.findById(ocorrencia.getIdLocal().getId()).orElse(null);
+
+
                     OcorrenciaDTO dto = new OcorrenciaDTO();
                     dto.setId(ocorrencia.getId());
                     dto.setDescricaoOcorrencia(ocorrencia.getDescricaoOcorrencia());
@@ -86,6 +90,15 @@ public class OcorrenciaService {
                         dto.setArtigoId(artigoCriminal.getId());
                         dto.setArtigoCodigo(artigoCriminal.getCodArtigo());
                         dto.setArtigoDescricao(artigoCriminal.getDescricao());
+                    }
+
+                    // Preencher os dados de localização
+                    if (local != null) {
+                        dto.setLogradouro(local.getLogradouro());
+                        dto.setBairro(local.getBairro());
+                        dto.setCidade(local.getCidade());
+                        dto.setEstado(local.getEstado());
+                        dto.setCep(local.getCep());
                     }
 
                     return dto;
@@ -127,7 +140,13 @@ public class OcorrenciaService {
         veiculo.setPlaca(request.getPlaca());
         veiculo = veiculoRepository.save(veiculo);
 
-
+        Local local = new Local();
+        local.setCep(request.getCep());
+        local.setCidade(request.getCidade());
+        local.setBairro(request.getBairro());
+        local.setEstado(request.getEstado());
+        local.setLogradouro(request.getLogradouro());
+        local = localRepository.save(local);
         
         Ocorrencia ocorrencia = new Ocorrencia();
         ocorrencia.setIdUsuario(usuario.getId());
@@ -138,6 +157,7 @@ public class OcorrenciaService {
         ocorrencia.setIdVeiculo(veiculo.getId());
         ocorrencia.setCodArtigo(request.getArtigoLei());
         ocorrencia.setAlerta(Boolean.TRUE.equals(request.getReceberAlertas()) ? 1L : 0L);
+        ocorrencia.setIdLocal(local);
         ocorrencia = repository.save(ocorrencia);
 
         Responsavel responsavel = new Responsavel();
@@ -275,10 +295,11 @@ public class OcorrenciaService {
         responsavel.setDenuncia(ocorrencia); 
         responsavel.setDelegacia(user.getDelegate());
         responsavel.setNumDistintivo(user.getBadge());
-        responsavel.setDataCriacao(LocalDateTime.now()); 
+        responsavel.setDataCriacao(LocalDateTime.now());
+        responsavel = responsavelRepository.save(responsavel);
 
-        
-        responsavelRepository.save(responsavel);
+        ocorrencia.setIdResponsavel(responsavel.getId());
+        repository.save(ocorrencia);
     }
     @Transactional
     public void desassumirResponsavel(Long id, String usuarioId) {
