@@ -27,6 +27,7 @@ public interface OcorrenciaRepository extends JpaRepository<Ocorrencia, Long>, J
             "AND (:dataFim IS NULL OR o.dataHora <= :dataFim)")
     Page<Ocorrencia> findByFilters(String status, String artigo, String hora,
                                    LocalDateTime dataInicio, LocalDateTime dataFim,
-                                   PageRequest pageRequest);}
+                                   Pageable pageable);
+}
 
 
