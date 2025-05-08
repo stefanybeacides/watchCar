@@ -8,10 +8,10 @@
         i.fas.fa-user
         | Dados Pessoais
       .step(:class="{ active: etapa === 2, completed: etapa > 2 }")
-        i.fas.fa-map-marker
+        i.fas.fa-map-marker-alt
         | Local
       .step(:class="{ active: etapa === 3, completed: etapa > 3 }")
-        font-awesome-icon(:icon="['fas', 'car']" size="2x")
+        i.fas.fa-car
         | Veículo
       .step(:class="{ active: etapa === 4, completed: etapa > 4 }")
         i.fas.fa-comment
@@ -124,7 +124,8 @@ import { fetchUserData } from '@/services/authService'
 import { toast } from 'vue3-toastify'
 import { enviarDenuncia as enviarDenunciaService } from '@/services/ocorrenciasService'
 import { buscarArtigos } from '@/services/artigoService'
-
+import { useLoadingStore } from '@/stores/loadingStore'
+const store = useLoadingStore()
 const router = useRouter()
 
 // Definindo os dados do formulário
@@ -297,12 +298,13 @@ const enviarDenuncia = async () => {
       cidade: cidade.value,
       estado: estado.value,
     }
-
+    store.startLoading() // Inicia o loading
     await enviarDenunciaService(denuncia)
-
+    store.stopLoading() // Para o loading quando a ação terminar
     toast.success('Denúncia registrada com sucesso!')
     router.push({ name: 'inicio' })
   } catch (error) {
+    store.stopLoading() // Para o loading quando a ação terminar
     toast.error('Erro ao registrar denúncia. Verifique os dados e tente novamente.')
   }
 }

@@ -103,7 +103,8 @@ import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { register as registerApi } from '@/services/authService'
 import { toast } from 'vue3-toastify'
-
+import { useLoadingStore } from '@/stores/loadingStore'
+const store = useLoadingStore()
 const router = useRouter()
 
 // Dados do formulário
@@ -241,6 +242,7 @@ const handleRegister = async () => {
   }
 
   try {
+    store.startLoading() // Inicia o loading
     const response = await registerApi(
       name.value,
       password.value,
@@ -256,9 +258,11 @@ const handleRegister = async () => {
     )
     if (response && response.success) {
       toast.success('Cadastro realizado com sucesso!')
+      store.stopLoading() // Para o loading quando a ação terminar
       await router.push('/login')
     }
   } catch (err) {
+    store.stopLoading() // Para o loading quando a ação terminar
     toast.error('Erro ao cadastrar usuário.')
   }
 }

@@ -40,6 +40,7 @@ import { useRouter } from 'vue-router'
 import { login as loginApi, fetchUserData as fetchUserData } from '@/services/authService'
 import { toast } from 'vue3-toastify'
 import ForgotPasswordModal from '@/views/components/ForgotPasswordModal.vue'
+import { useLoadingStore } from '@/stores/loadingStore'
 
 const loginCpf = ref('')
 const loginPassword = ref('')
@@ -47,6 +48,7 @@ const showPassword = ref(false)
 const cpfError = ref('')
 const router = useRouter()
 const forgotPasswordModal = ref<InstanceType<typeof ForgotPasswordModal> | null>(null)
+const store = useLoadingStore()
 
 onMounted(() => {
   const msg = localStorage.getItem('loginMessage')
@@ -107,6 +109,7 @@ const handleLogin = async () => {
 
   try {
     loginCpf.value = loginCpf.value.replace(/\D/g, '')
+    store.startLoading() // Inicia o loading
 
     const response = await loginApi(loginCpf.value, loginPassword.value)
     if (response && response.token) {
@@ -117,14 +120,17 @@ const handleLogin = async () => {
       localStorage.setItem('userName', userData.username)
       localStorage.setItem('userPerfil', userData.role.name)
       localStorage.setItem('userId', userData.id)
+      store.stopLoading() // Para o loading quando a ação terminar
 
       window.dispatchEvent(new Event('storage'))
       await router.push({ name: 'inicio' })
       window.location.reload()
     } else {
+      store.stopLoading() // Para o loading quando a ação terminar
       toast.error('Erro ao fazer login. Verifique seu CPF e senha.')
     }
   } catch (err) {
+    store.stopLoading() // Para o loading quando a ação terminar
     toast.error('Erro ao realizar login.')
   }
 }

@@ -1,8 +1,13 @@
 <template lang="pug">
   .inicio
     h1 Bem-vindo ao Sistema de Denúncia de Veículos
+    p.subtitulo Registre, acompanhe e contribua com a segurança da sua cidade.
 
-    // Seção de Notícias e Informações
+    button(@click="registrarDenuncia" class="btn-denuncia") Registrar Denúncia
+
+    .linha
+
+    h2 Últimas Notícias e Informações
     .informacoes
       .noticias
         .noticia(v-for="(noticia, index) in noticias" :key="index")
@@ -10,23 +15,27 @@
             img(:src="noticia.img" alt="Notícia" class="noticia-img")
             p.texto {{ noticia.texto }}
 
-    // Carrossel de Artigos
+    .linha
+
     .carrossel
       h2 Artigos e Dicas de Segurança
       .swiper-container
         .swiper-wrapper
           .swiper-slide
             .artigo
-              img(src="https://via.placeholder.com/300x200" alt="Artigo 1")
+              img(src="https://www.smartia.com.br/wp-content/uploads/2019/05/seguro-auto-1.jpg" alt="Artigo 1")
               h3 Como evitar roubos de veículos
-              p Breve descrição do artigo.
+              p Mantenha seu carro em locais iluminados, instale alarmes e rastreadores, e evite deixar objetos de valor à vista para reduzir o risco de furtos.
+
           .swiper-slide
             .artigo
-              img(src="https://via.placeholder.com/300x200" alt="Artigo 2")
+              img(src="https://www.urbanparkgru.com.br/dicas-de-viagem/wp-content/uploads/2018/05/cinco-orientacoes-para-estacionar-com-seguranca.jpg" alt="Artigo 2")
               h3 Dicas de segurança para estacionar
-              p Breve descrição do artigo.
+              p Sempre estacione em locais movimentados, prefira vagas próximas a câmeras de vigilância e evite deixar o carro por longos períodos em áreas desertas.
 
-    // Vídeo explicativo
+
+    .linha
+
     .video
       h2 Como registrar uma denúncia
       iframe(width="560" height="315" src="https://www.youtube.com/embed/3x5-XHEy8JE?si=ecm_B1LC-nD4xJ9l" title="Como registrar uma denúncia" frameborder="0" allowfullscreen)
@@ -43,15 +52,15 @@ const router = useRouter()
 
 const noticias = ref([
   {
-    img: 'https://via.placeholder.com/300x200',
+    img: 'https://backend.intelbras.com/sites/default/files/inline-images/Captura%20de%20tela%202023-01-11%20141306.png',
     texto: 'Sistema de segurança em área pública está sendo aprimorado.',
   },
   {
-    img: 'https://via.placeholder.com/300x200',
+    img: 'https://fotos-jornaldocarro-estadao.nyc3.cdn.digitaloceanspaces.com/uploads/2019/03/12130947/car-1590508_1920-1160x773.jpg',
     texto: 'Aumento de ocorrências em regiões específicas, redobrar atenção.',
   },
   {
-    img: 'https://via.placeholder.com/300x200',
+    img: 'https://terrabrasilnoticias.com/wp-content/uploads/2024/09/cyber-fraud_1725782281751.jpg',
     texto: 'Polícia alerta sobre novas formas de fraude digital.',
   },
 ])
@@ -66,73 +75,94 @@ const registrarDenuncia = () => {
 .inicio {
   text-align: center;
   padding: 3rem 2rem;
-  background: linear-gradient(135deg, #1e1e2f, #3a3a6a);
+  background-color: #f9f9f9;
   min-height: 100vh;
-  color: #fff;
+  color: #333;
   font-family: 'Roboto', sans-serif;
   box-sizing: border-box;
 }
 
 h1 {
-  font-size: 2.8rem;
-  margin-bottom: 2rem;
-  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  color: #222;
 }
 
 h2 {
   font-size: 2rem;
-  margin: 1.5rem 0;
-  color: #42b983;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 1.5rem 0 0.5rem;
+  color: #2c3e50;
+}
+
+.subtitulo {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+/* Botão de Registrar Denúncia */
+.btn-denuncia {
+  margin: 2rem auto;
+  background: #e74c3c;
+  color: white;
+  padding: 1rem 2.5rem;
+  border: none;
+  font-size: 1.4rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.btn-denuncia:hover {
+  background: #c0392b;
+  box-shadow: 0 6px 18px rgba(231, 76, 60, 0.6);
+  transform: translateY(-3px);
+}
+
+/* Linha divisória */
+.linha {
+  height: 1px;
+  background-color: #ddd;
+  margin: 3rem 0 2rem;
 }
 
 /* Seção de Notícias */
-.informacoes {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
 .noticias {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .noticia-card {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.1);
+  background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   width: 250px;
-  backdrop-filter: blur(10px);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .noticia-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  transform: translateY(-6px);
 }
 
 .noticia-img {
   width: 100%;
   height: 150px;
   object-fit: cover;
-  border-bottom: 2px solid #fff;
 }
 
 .texto {
   padding: 1rem;
   font-size: 1rem;
-  line-height: 1.5;
-  color: #eaeaea;
+  color: #333;
 }
 
 /* Carrossel de Artigos */
@@ -142,39 +172,32 @@ h2 {
 
 .swiper-container {
   width: 100%;
-  padding-bottom: 2rem;
+  padding: 1rem 0;
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .swiper-wrapper {
   display: flex;
   gap: 1.5rem;
+  overflow-x: auto;
 }
 
 .swiper-slide {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  flex: 0 0 auto;
 }
 
 .artigo {
-  background: rgba(255, 255, 255, 0.1);
+  background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 300px;
-  backdrop-filter: blur(10px);
   text-align: center;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .artigo:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  transform: translateY(-6px);
 }
 
 .artigo img {
@@ -185,85 +208,43 @@ h2 {
 
 .artigo h3 {
   font-size: 1.2rem;
-  margin: 1rem 0;
-  color: #fff;
+  margin: 1rem 0 0.5rem;
+  color: #222;
 }
 
 .artigo p {
   padding: 0 1rem 1rem;
-  font-size: 0.9rem;
-  color: #ddd;
+  font-size: 0.95rem;
+  color: #555;
 }
 
 /* Vídeo explicativo */
 .video {
-  background: rgba(255, 255, 255, 0.1);
+  background: white;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-bottom: 3rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .video iframe {
+  width: 100%;
+  height: 400px;
   border-radius: 8px;
-}
-
-/* Botão de Registrar Denúncia */
-.btn-denuncia {
-  margin-top: 2rem;
-  background: linear-gradient(135deg, #42b983, #34a74f);
-  color: white;
-  padding: 1rem 2.5rem;
-  border: none;
-  font-size: 1.4rem;
-  font-weight: bold;
-  border-radius: 50px;
-  cursor: pointer;
-  box-shadow: 0 8px 16px rgba(66, 185, 131, 0.4);
-  transition: all 0.3s ease;
-}
-
-.btn-denuncia:hover {
-  background: linear-gradient(135deg, #34a74f, #2e9d65);
-  box-shadow: 0 12px 24px rgba(66, 185, 131, 0.6);
-  transform: translateY(-3px);
-}
-
-/* Scrollbar estilizado */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-::-webkit-scrollbar-thumb {
-  background: #42b983;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #34a74f;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
-  .noticias,
-  .swiper-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
   .noticia-card,
   .artigo {
     width: 90%;
   }
 
-  iframe {
-    width: 100%;
-    height: auto;
+  .video iframe {
+    height: 250px;
   }
 
   h1 {
@@ -271,7 +252,7 @@ h2 {
   }
 
   h2 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 
   .btn-denuncia {

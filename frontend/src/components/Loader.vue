@@ -1,42 +1,41 @@
-<!-- components/Loader.vue -->
 <template>
-  <div class="loader-overlay" v-if="visible">
+  <div v-if="loading" class="overlay-loading">
     <div class="spinner"></div>
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-}
+<script setup>
+import { computed } from 'vue'
+import { useLoadingStore } from '@/stores/loadingStore' // Importe a store correta
+
+const store = useLoadingStore() // Acesse a store corretamente
+
+const loading = computed(() => store.loading) // Bind ao estado de loading
 </script>
 
 <style scoped>
-.loader-overlay {
+.overlay-loading {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
 }
+
 .spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #2e7d32;
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #42b983;
   border-radius: 50%;
+  width: 60px;
+  height: 60px;
   animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

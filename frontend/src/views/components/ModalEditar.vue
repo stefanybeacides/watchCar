@@ -72,7 +72,8 @@
 import { ref, watch } from 'vue'
 import { enviarAcaoInvestigacao } from '@/services/ocorrenciasService'
 import { toast } from 'vue3-toastify'
-
+import { useLoadingStore } from '@/stores/loadingStore'
+const store = useLoadingStore()
 const props = defineProps({
   ocorrencia: Object,
 })
@@ -120,12 +121,15 @@ const salvar = async () => {
   }
 
   try {
-    await enviarAcaoInvestigacao(payload)
+    store.startLoading() // Inicia o loading
 
-    toast.success('Ação registrada com sucesso.')
+    await enviarAcaoInvestigacao(payload)
     emit('salvo')
     emit('close')
+    toast.success('Ação registrada com sucesso.')
+    store.stopLoading() // Para o loading quando a ação terminar
   } catch (err) {
+    store.stopLoading() // Para o loading quando a ação terminar
     console.error('Erro ao salvar ação:', err)
     toast.error('Erro ao salvar ação de investigação.')
   }

@@ -139,7 +139,8 @@ import {
 } from '@/services/ocorrenciasService'
 
 import { EyeOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons-vue'
-
+import { useLoadingStore } from '@/stores/loadingStore'
+const store = useLoadingStore()
 const ocorrencias = ref<any[]>([])
 const artigos = ref<any[]>([]) // Para armazenar os artigos
 const filters = ref({
@@ -221,10 +222,13 @@ const formatDataHora = (dataHora: any) => {
 
 const fetchOcorrencias = async () => {
   try {
+    store.startLoading() // Inicia o loading
     const data = await obterOcorrencias(filters.value, currentPage.value, pageSize.value)
     ocorrencias.value = data.content
     totalPages.value = data.totalPages
+    store.stopLoading() // Para o loading quando a ação terminar
   } catch (error) {
+    store.stopLoading() // Para o loading quando a ação terminar
     console.error('Erro ao carregar as ocorrências:', error)
   }
 }

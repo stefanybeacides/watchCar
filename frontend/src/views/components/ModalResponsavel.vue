@@ -101,13 +101,15 @@
 
 <script setup lang="ts">
 import { defineProps, defineEmits, onMounted, ref, watch } from 'vue'
+import { toast } from 'vue3-toastify'
 import {
   obterOcorrenciaPorId,
   assumirResponsavel,
   desassumirResponsavel,
 } from '@/services/ocorrenciasService'
 import { fetchUserData } from '@/services/authService'
-
+import { useLoadingStore } from '@/stores/loadingStore'
+const store = useLoadingStore()
 const props = defineProps({
   ocorrencia: {
     type: Object,
@@ -136,7 +138,6 @@ const carregarHistorico = async () => {
     }
 
     const resposta = await obterOcorrenciaPorId(props.ocorrencia.id)
-    console.log('Resposta da API:', resposta)
 
     acoes.value = resposta.acoesInvestigacao || []
     historico.value = resposta.historicoResponsaveis || []
@@ -148,14 +149,18 @@ const carregarHistorico = async () => {
 const confirmarAcao = async () => {
   try {
     if (props.isResponsavel) {
+      store.startLoading() // Inicia o loading
       await desassumirResponsavel(props.ocorrencia.id, props.userId)
     } else {
+      store.startLoading() // Inicia o loading
       await assumirResponsavel(props.ocorrencia.id, props.userId)
+      store.stopLoading() // Para o loading quando a ação terminar
     }
     emit('salvo')
     emit('close')
   } catch (error) {
-    console.error('Erro ao atualizar responsável:', error)
+    store.stopLoading() // Para o loading quando a ação terminar
+    toast.error('Erro ao atualizar responsável.')
   }
 }
 
