@@ -2,7 +2,6 @@
 import { ref, computed, watchEffect, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
-import Loader from '@/components/Loader.vue'
 
 const router = useRouter()
 
