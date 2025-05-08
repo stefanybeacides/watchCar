@@ -39,6 +39,7 @@ public interface OcorrenciaRepository extends JpaRepository<Ocorrencia, Long>, J
 
 
 
+
 }
 
 
