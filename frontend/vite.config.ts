@@ -15,7 +15,6 @@ export default defineConfig({
   },
   preview: {
     host: '0.0.0.0', // Permite acessar de qualquer IP
-    port: 4173, // Defina a porta, caso necessário
-    // Não é necessário configurar allowedHosts a menos que você tenha um domínio específico que queira restringir.
+    allowedHosts: ['watchcar.onrender.com', 'localhost'], // Permite esse domínio específico
   },
 })
