@@ -15,6 +15,6 @@ export default defineConfig({
   },
   preview: {
     host: '0.0.0.0', // Permite acessar de qualquer IP
-    allowedHosts: ['watchcar.onrender.com', 'localhost'], // Permite esse domínio específico
+    allowedHosts: ['watchcar.onrender.com', 'localhost', 'watchcar.com.br', 'www.watchcar.com.br'], // Permite esse domínio específico
   },
 })
