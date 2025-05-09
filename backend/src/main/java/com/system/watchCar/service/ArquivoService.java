@@ -92,7 +92,7 @@ public class ArquivoService {
                     denunciaRequest.setIdUsuario(1L);
                     denunciaRequest.setCep(dto.getCep());
                     denunciaRequest.setBairro(dto.getBairro());
-                    denunciaRequest.setAno(Integer.valueOf(dto.getAno_modelo()));
+                    denunciaRequest.setAno(parseInteger(dto.getAno_modelo()));
                     denunciaRequest.setCidade(dto.getCidade());
                     denunciaRequest.setLogradouro(dto.getLogradouro());
                     denunciaRequest.setMarca(dto.getDescr_tipo_veiculo());
@@ -100,16 +100,24 @@ public class ArquivoService {
                     denunciaRequest.setPlaca(dto.getPlaca_veiculo());
                     denunciaRequest.setEstado("São Paulo");
                     denunciaRequest.setStatusDenuncia("Em andamento");
-                    denunciaRequest.setHoraOcorrencia(dto.getHora_ocorrncia().toString());
+                    denunciaRequest.setHoraOcorrencia(
+                            dto.getHora_ocorrncia() != null ? dto.getHora_ocorrncia().toString() : ""
+                    );
                     denunciaRequest.setDescricao(dto.getDescr_ocorrencia_veiculo());
                     if (dto.getData_ocorrncia_bo() != null && dto.getHora_ocorrncia() != null) {
                         denunciaRequest.setDataHora(LocalDateTime.of(dto.getData_ocorrncia_bo(), dto.getHora_ocorrncia()));
+                    } else {
+                        denunciaRequest.setDataHora(LocalDateTime.now()); // ou null, ou outro default
                     }
                     denunciaRequest.setCor(dto.getDesc_cor_veiculo());
                     denunciaRequest.setArtigoLei(String.valueOf(id));
                     denunciaRequest.setReceberAlertas(true);
-                    ocorrenciaService.criarDenuncia(denunciaRequest);
-
+                    try {
+                        ocorrenciaService.criarDenuncia(denunciaRequest);
+                    } catch (Exception e) {
+                        System.err.println("Erro ao criar denúncia: " + e.getMessage());
+                        throw new RuntimeException(e.getMessage());
+                    }
                 }
 
                 return "Importação realizada com sucesso!";
@@ -120,6 +128,23 @@ public class ArquivoService {
             return "Erro ao importar: " + e.getMessage();
         }
     }
+
+    private String sanitizeString(String value) {
+        if (value == null || value.trim().equalsIgnoreCase("NULL")) return "";
+        return value.trim();
+    }
+
+
+    private Integer parseInteger(String value) {
+        try {
+            if (value == null || value.isEmpty() || value.equalsIgnoreCase("NULL")) return null;
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            System.out.println("Erro ao parsear número: " + value);
+            return null; // ou 0, dependendo do seu caso
+        }
+    }
+
 
     private Long obterOuCriarArtigoPorRubrica(String rubrica) {
         if (rubrica == null || rubrica.trim().isEmpty()) {
@@ -142,30 +167,52 @@ public class ArquivoService {
         }
     }
     private String getCellValueAsString(Cell cell) {
-        return switch (cell.getCellType()) {
-            case STRING -> cell.getStringCellValue();
-            case NUMERIC -> {
+        if (cell == null) {
+            return ""; // Ou outro valor padrão
+        }
+
+        String value;
+        switch (cell.getCellType()) {
+            case STRING:
+                value = cell.getStringCellValue();
+                break;
+            case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     // Verificar se o formato da célula é de hora (com segundos)
                     if (cell.getCellStyle().getDataFormatString().contains("h")) {
                         // Formato de hora com segundos (HH:mm:ss)
                         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-                        yield timeFormatter.format(cell.getLocalDateTimeCellValue().toLocalTime());
+                        value = timeFormatter.format(cell.getLocalDateTimeCellValue().toLocalTime());
                     } else {
                         // Formato de data (yyyy-MM-dd)
                         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                        yield dateFormatter.format(cell.getLocalDateTimeCellValue().toLocalDate());
+                        value = dateFormatter.format(cell.getLocalDateTimeCellValue().toLocalDate());
                     }
                 } else {
-                    yield String.valueOf((long) cell.getNumericCellValue());
+                    value = String.valueOf((long) cell.getNumericCellValue());
                 }
-            }
-            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
-            case FORMULA -> getCellValueAsString(cell); // Recursão para fórmulas
-            case BLANK -> "";
-            default -> "";
-        };
+                break;
+            case BOOLEAN:
+                value = String.valueOf(cell.getBooleanCellValue());
+                break;
+            case FORMULA:
+                value = getCellValueAsString(cell); // Recursão para fórmulas
+                break;
+            case BLANK:
+                value = "";
+                break;
+            default:
+                value = "";
+        }
+
+        // Se o valor for "NULL" (string literal), retorne uma string vazia ou um valor padrão
+        if ("NULL".equalsIgnoreCase(value)) {
+            value = "";  // Ou outro valor padrão
+        }
+
+        return value;
     }
+
 
 
     private LocalDate parseDate(String value) {
