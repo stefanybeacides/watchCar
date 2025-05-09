@@ -6,6 +6,17 @@
     .filters
       .inputs
       .filters.inputs
+        button.btn-import(
+        v-if="perfilUsuario === 'GESTOR_DE_SEGURANCA_PUBLICA'"
+        @click="$refs.fileInput.click()"
+        ) Importar CSV
+        input(
+          type="file"
+          ref="fileInput"
+          @change="handleFileUpload"
+          accept=".xlsx"
+          style="display: none;"
+        )
         select(v-model="filters.status")
           option(value="") Selecione o Status
           option(value="Em andamento") Em Andamento
@@ -39,7 +50,7 @@
             th(v-if="perfilUsuario !== 'PUBLICO'") Ações
         tbody
           tr(v-if="ocorrencias.length === 0")
-            td(colspan="10" style="text-align: center;") Sem registros
+            td(colspan="11" style="text-align: center;") Sem registros
           tr(v-for="(ocorrencia, index) in ocorrencias" :key="index")
             td(data-label="Usuário") {{ ocorrencia.usuarioNome }}
             td(data-label="Email")  {{ ocorrencia.usuarioEmail }}
@@ -134,6 +145,9 @@ import {
 
 import { EyeOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons-vue'
 import { useLoadingStore } from '@/stores/loadingStore'
+import { importarCsv } from '@/services/arquivoService' // Adicione essa linha no topo
+import { toast } from 'vue3-toastify'
+
 const store = useLoadingStore()
 const ocorrencias = ref<any[]>([])
 const artigos = ref<any[]>([]) // Para armazenar os artigos
@@ -226,6 +240,27 @@ const fetchOcorrencias = async () => {
     console.error('Erro ao carregar as ocorrências:', error)
   }
 }
+
+const handleFileUpload = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input?.files?.[0]
+  if (!file) return
+
+  try {
+    store.startLoading() // Inicia o loading
+    const resultado = await importarCsv(file)
+    store.stopLoading() // Para o loading quando a ação terminar
+
+    fetchOcorrencias() // Atualiza a lista após importar
+    toast.success('Importado com sucesso:')
+  } catch (error: any) {
+    store.stopLoading() // Para o loading quando a ação terminar
+    window.location.reload()
+    toast.success('Erro na importação: ', error.message)
+    console.error('Erro na importação:', error.message)
+  }
+}
+
 const getResponsabilidade = (ocorrenciaId: string) => {
   const responsabilidade = responsabilidades.value.find((res) => res.id === ocorrenciaId)
   return responsabilidade ? responsabilidade.responsavel : false
@@ -373,6 +408,17 @@ onMounted(() => {
 }
 
 .btn-sm {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  margin-right: 0.5rem;
+  background-color: #218838;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-import {
   padding: 0.3rem 0.6rem;
   font-size: 0.75rem;
   margin-right: 0.5rem;

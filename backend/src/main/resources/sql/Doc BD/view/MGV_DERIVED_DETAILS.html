@@ -1,0 +1,696 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF8" />
+<script src="MGV_DERIVED_DETAILS/report.js" type="text/javascript"></script>
+<link href="MGV_DERIVED_DETAILS/report.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<div class="banner">
+<table width="98%"><tr>
+<td><h2 class="banner">MGV_DERIVED_DETAILS</h2></td>
+</tr></table></div>
+<div id="maintabs">
+<div class="currentmaintab" onclick="onSelectMainTab(this, 0)">
+<div>
+<p>Colunas</p>
+</div>
+</div>
+<div class="maintab" onclick="onSelectMainTab(this, 1)">
+<div>
+<p>Concessões</p>
+</div>
+</div>
+<div class="maintab" onclick="onSelectMainTab(this, 2)">
+<div>
+<p>Dependências</p>
+</div>
+</div>
+<div class="maintab" onclick="onSelectMainTab(this, 3)">
+<div>
+<p>Detalhes</p>
+</div>
+</div>
+<div class="maintab" onclick="onSelectMainTab(this, 4)">
+<div>
+<p>Triggers</p>
+</div>
+</div>
+<div class="maintab" onclick="onSelectMainTab(this, 5)">
+<div>
+<p>Erros</p>
+</div>
+</div>
+</div>
+<br/>
+<div id="masterreports">
+<div id="Master.0">
+<div class="currentmasterreport">
+<table id="Table.0" cellpadding="0" cellspacing="0" summary="">
+<tr>
+<th>COLUMN_NAME</th>
+<th>DATA_TYPE</th>
+<th>NULLABLE</th>
+<th>DATA_DEFAULT</th>
+<th>COLUMN_ID</th>
+<th>COMMENTS</th>
+<th>INSERTABLE</th>
+<th>UPDATABLE</th>
+<th>DELETABLE</th>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 0)" class="currentrow">
+<td class="currentcell">CAPCATALOGID</td>
+<td class="currentcell">NUMBER</td>
+<td class="currentcell">Yes</td>
+<td class="currentcell">null</td>
+<td class="currentcell">1</td>
+<td class="currentcell">null</td>
+<td class="currentcell">NO</td>
+<td class="currentcell">NO</td>
+<td class="currentcell">NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 1)">
+<td>CAPCATALOGNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>2</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 2)">
+<td>CAPCONNID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>3</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 3)">
+<td>CAPCONNNAME</td>
+<td>VARCHAR2(255)</td>
+<td>Yes</td>
+<td>null</td>
+<td>4</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 4)">
+<td>CAPMAINOBJID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>5</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 5)">
+<td>CAPMAINOBJNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>6</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 6)">
+<td>CAPMAINOBJTYPE</td>
+<td>VARCHAR2(18)</td>
+<td>Yes</td>
+<td>null</td>
+<td>7</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 7)">
+<td>CAPOBJID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>8</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 8)">
+<td>CAPOBJNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>9</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 9)">
+<td>CAPOBJTYPE</td>
+<td>VARCHAR2(18)</td>
+<td>Yes</td>
+<td>null</td>
+<td>10</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 10)">
+<td>CAPPROJECTID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>11</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 11)">
+<td>CAPPROJECTNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>12</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 12)">
+<td>CAPQUALIFIEDNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>13</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 13)">
+<td>CAPSCHEMAID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>14</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 14)">
+<td>CAPSCHEMANAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>15</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 15)">
+<td>CONCATALOGID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>16</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 16)">
+<td>CONCATALOGNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>17</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 17)">
+<td>CONCONNID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>18</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 18)">
+<td>CONCONNNAME</td>
+<td>VARCHAR2(255)</td>
+<td>Yes</td>
+<td>null</td>
+<td>19</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 19)">
+<td>CONMAINOBJID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>20</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 20)">
+<td>CONMAINOBJNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>21</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 21)">
+<td>CONMAINOBJTYPE</td>
+<td>VARCHAR2(18)</td>
+<td>Yes</td>
+<td>null</td>
+<td>22</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 22)">
+<td>CONOBJID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>23</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 23)">
+<td>CONOBJNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>24</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 24)">
+<td>CONOBJTYPE</td>
+<td>VARCHAR2(18)</td>
+<td>Yes</td>
+<td>null</td>
+<td>25</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 25)">
+<td>CONPROJECTID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>26</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 26)">
+<td>CONPROJECTNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>27</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 27)">
+<td>CONQUALIFIEDNAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>28</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 28)">
+<td>CONSCHEMAID</td>
+<td>NUMBER</td>
+<td>Yes</td>
+<td>null</td>
+<td>29</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 29)">
+<td>CONSCHEMANAME</td>
+<td>VARCHAR2(4000)</td>
+<td>Yes</td>
+<td>null</td>
+<td>30</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 30)">
+<td>DERIVATIVE_REASON</td>
+<td>VARCHAR2(10)</td>
+<td>Yes</td>
+<td>null</td>
+<td>31</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+<tr onclick="table_onSelectMasterRow(this, 0, 31)">
+<td>TRANSFORMED</td>
+<td>CHAR(1)</td>
+<td>Yes</td>
+<td>null</td>
+<td>32</td>
+<td>null</td>
+<td>NO</td>
+<td>NO</td>
+<td>NO</td>
+</tr>
+</table>
+</div>
+</div>
+<div id="Master.1">
+<div class="masterreport">
+<table id="Table.1" cellpadding="0" cellspacing="0" summary="">
+<tr>
+<th>PRIVILEGE</th>
+<th>GRANTEE</th>
+<th>GRANTABLE</th>
+<th>GRANTOR</th>
+<th>OBJECT_NAME</th>
+</tr>
+</table>
+</div>
+</div>
+<div id="Master.2">
+<div class="masterreport">
+<table id="Table.2" cellpadding="0" cellspacing="0" summary="">
+<tr>
+<th>OWNER</th>
+<th>NAME</th>
+<th>TYPE</th>
+<th>REFERENCED_OWNER</th>
+<th>REFERENCED_NAME</th>
+<th>REFERENCED_TYPE</th>
+</tr>
+</table>
+<br/>
+<hr/>
+<br/><div id="ChildTabs.2">
+<div class="currentchildtab" onclick="onSelectChildTab(this, 0)">
+<div>
+<p>Referências</p>
+</div>
+</div>
+</div>
+<br/>
+<div id="ChildReports.2">
+</div>
+</div>
+</div>
+<div id="Master.3">
+<div class="masterreport">
+<table id="Table.3" cellpadding="0" cellspacing="0" summary="">
+<th>NAME</th>
+<th>VALUE</th>
+</tr>
+<tr>
+<td>CREATED</td>
+<td>04/05/25</td>
+</tr>
+<tr>
+<td>LAST_DDL_TIME</td>
+<td>04/05/25</td>
+</tr>
+<tr>
+<td>OWNER</td>
+<td>ADS</td>
+</tr>
+<tr>
+<td>VIEW_NAME</td>
+<td>MGV_DERIVED_DETAILS</td>
+</tr>
+<tr>
+<td>TEXT_LENGTH</td>
+<td>1252</td>
+</tr>
+<tr>
+<td>TEXT</td>
+<td>select&nbsp;d1.catalogid&nbsp;capcatalogid,
+&nbsp;&nbsp;&nbsp;d1.catalogname&nbsp;capcatalogname,
+&nbsp;&nbsp;&nbsp;d1.connid&nbsp;capconnid,
+&nbsp;&nbsp;&nbsp;d1.connname&nbsp;capconnname,
+&nbsp;&nbsp;&nbsp;d1.mainobjid&nbsp;capmainobjid,
+&nbsp;&nbsp;&nbsp;d1.mainobjname&nbsp;capmainobjname,
+&nbsp;&nbsp;&nbsp;d1.mainobjtype&nbsp;capmainobjtype&nbsp;,
+&nbsp;&nbsp;&nbsp;d1.objid&nbsp;capobjid,
+&nbsp;&nbsp;&nbsp;d1.objname&nbsp;capobjname,
+&nbsp;&nbsp;&nbsp;d1.objtype&nbsp;capobjtype,
+&nbsp;&nbsp;&nbsp;d1.projectid&nbsp;capprojectid,
+&nbsp;&nbsp;&nbsp;d1.projectname&nbsp;capprojectname,
+&nbsp;&nbsp;&nbsp;d1.qualifiedname&nbsp;capqualifiedname,
+&nbsp;&nbsp;&nbsp;d1.schemaid&nbsp;capschemaid,
+&nbsp;&nbsp;&nbsp;d1.schemaname&nbsp;capschemaname,
+&nbsp;&nbsp;&nbsp;d2.catalogid&nbsp;concatalogid,
+&nbsp;&nbsp;&nbsp;d2.catalogname&nbsp;concatalogname,
+&nbsp;&nbsp;&nbsp;d2.connid&nbsp;conconnid,
+&nbsp;&nbsp;&nbsp;d2.connname&nbsp;conconnname,
+&nbsp;&nbsp;&nbsp;d2.mainobjid&nbsp;conmainobjid,
+&nbsp;&nbsp;&nbsp;d2.mainobjname&nbsp;conmainobjname,
+&nbsp;&nbsp;&nbsp;d2.mainobjtype&nbsp;conmainobjtype&nbsp;,
+&nbsp;&nbsp;&nbsp;d2.objid&nbsp;conobjid,
+&nbsp;&nbsp;&nbsp;d2.objname&nbsp;conobjname,
+&nbsp;&nbsp;&nbsp;d2.objtype&nbsp;conobjtype,
+&nbsp;&nbsp;&nbsp;d2.projectid&nbsp;conprojectid,
+&nbsp;&nbsp;&nbsp;d2.projectname&nbsp;conprojectname,
+&nbsp;&nbsp;&nbsp;d2.qualifiedname&nbsp;conqualifiedname,
+&nbsp;&nbsp;&nbsp;d2.schemaid&nbsp;conschemaid,
+&nbsp;&nbsp;&nbsp;d2.schemaname&nbsp;conschemaname,
+&nbsp;&nbsp;&nbsp;&nbsp;der.derivative_reason,
+&nbsp;&nbsp;&nbsp;&nbsp;der.transformed
+&nbsp;&nbsp;FROM&nbsp;mgv_all_details&nbsp;d1
+&nbsp;&nbsp;LEFT&nbsp;OUTER&nbsp;JOIN&nbsp;md_derivatives&nbsp;der
+&nbsp;&nbsp;ON&nbsp;der.src_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;d1.objid
+&nbsp;&nbsp;AND&nbsp;der.derivative_reason&nbsp;IS&nbsp;NULL
+&nbsp;&nbsp;LEFT&nbsp;OUTER&nbsp;JOIN&nbsp;mgv_all_details&nbsp;d2
+&nbsp;&nbsp;ON&nbsp;der.derived_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;d2.objid
+&nbsp;&nbsp;WHERE&nbsp;d1.capturedorconverted&nbsp;=&nbsp;'CAPTURED'
+&nbsp;&nbsp;AND&nbsp;der.derivative_reason&nbsp;&nbsp;&nbsp;IS&nbsp;NULL</td>
+</tr>
+<tr>
+<td>TEXT_VC</td>
+<td>select&nbsp;d1.catalogid&nbsp;capcatalogid,
+&nbsp;&nbsp;&nbsp;d1.catalogname&nbsp;capcatalogname,
+&nbsp;&nbsp;&nbsp;d1.connid&nbsp;capconnid,
+&nbsp;&nbsp;&nbsp;d1.connname&nbsp;capconnname,
+&nbsp;&nbsp;&nbsp;d1.mainobjid&nbsp;capmainobjid,
+&nbsp;&nbsp;&nbsp;d1.mainobjname&nbsp;capmainobjname,
+&nbsp;&nbsp;&nbsp;d1.mainobjtype&nbsp;capmainobjtype&nbsp;,
+&nbsp;&nbsp;&nbsp;d1.objid&nbsp;capobjid,
+&nbsp;&nbsp;&nbsp;d1.objname&nbsp;capobjname,
+&nbsp;&nbsp;&nbsp;d1.objtype&nbsp;capobjtype,
+&nbsp;&nbsp;&nbsp;d1.projectid&nbsp;capprojectid,
+&nbsp;&nbsp;&nbsp;d1.projectname&nbsp;capprojectname,
+&nbsp;&nbsp;&nbsp;d1.qualifiedname&nbsp;capqualifiedname,
+&nbsp;&nbsp;&nbsp;d1.schemaid&nbsp;capschemaid,
+&nbsp;&nbsp;&nbsp;d1.schemaname&nbsp;capschemaname,
+&nbsp;&nbsp;&nbsp;d2.catalogid&nbsp;concatalogid,
+&nbsp;&nbsp;&nbsp;d2.catalogname&nbsp;concatalogname,
+&nbsp;&nbsp;&nbsp;d2.connid&nbsp;conconnid,
+&nbsp;&nbsp;&nbsp;d2.connname&nbsp;conconnname,
+&nbsp;&nbsp;&nbsp;d2.mainobjid&nbsp;conmainobjid,
+&nbsp;&nbsp;&nbsp;d2.mainobjname&nbsp;conmainobjname,
+&nbsp;&nbsp;&nbsp;d2.mainobjtype&nbsp;conmainobjtype&nbsp;,
+&nbsp;&nbsp;&nbsp;d2.objid&nbsp;conobjid,
+&nbsp;&nbsp;&nbsp;d2.objname&nbsp;conobjname,
+&nbsp;&nbsp;&nbsp;d2.objtype&nbsp;conobjtype,
+&nbsp;&nbsp;&nbsp;d2.projectid&nbsp;conprojectid,
+&nbsp;&nbsp;&nbsp;d2.projectname&nbsp;conprojectname,
+&nbsp;&nbsp;&nbsp;d2.qualifiedname&nbsp;conqualifiedname,
+&nbsp;&nbsp;&nbsp;d2.schemaid&nbsp;conschemaid,
+&nbsp;&nbsp;&nbsp;d2.schemaname&nbsp;conschemaname,
+&nbsp;&nbsp;&nbsp;&nbsp;der.derivative_reason,
+&nbsp;&nbsp;&nbsp;&nbsp;der.transformed
+&nbsp;&nbsp;FROM&nbsp;mgv_all_details&nbsp;d1
+&nbsp;&nbsp;LEFT&nbsp;OUTER&nbsp;JOIN&nbsp;md_derivatives&nbsp;der
+&nbsp;&nbsp;ON&nbsp;der.src_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;d1.objid
+&nbsp;&nbsp;AND&nbsp;der.derivative_reason&nbsp;IS&nbsp;NULL
+&nbsp;&nbsp;LEFT&nbsp;OUTER&nbsp;JOIN&nbsp;mgv_all_details&nbsp;d2
+&nbsp;&nbsp;ON&nbsp;der.derived_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;d2.objid
+&nbsp;&nbsp;WHERE&nbsp;d1.capturedorconverted&nbsp;=&nbsp;'CAPTURED'
+&nbsp;&nbsp;AND&nbsp;der.derivative_reason&nbsp;&nbsp;&nbsp;IS&nbsp;NULL</td>
+</tr>
+<tr>
+<td>TYPE_TEXT_LENGTH</td>
+<td>null</td>
+</tr>
+<tr>
+<td>TYPE_TEXT</td>
+<td>null</td>
+</tr>
+<tr>
+<td>OID_TEXT_LENGTH</td>
+<td>null</td>
+</tr>
+<tr>
+<td>OID_TEXT</td>
+<td>null</td>
+</tr>
+<tr>
+<td>VIEW_TYPE_OWNER</td>
+<td>null</td>
+</tr>
+<tr>
+<td>VIEW_TYPE</td>
+<td>null</td>
+</tr>
+<tr>
+<td>SUPERVIEW_NAME</td>
+<td>null</td>
+</tr>
+<tr>
+<td>EDITIONING_VIEW</td>
+<td>N</td>
+</tr>
+<tr>
+<td>READ_ONLY</td>
+<td>N</td>
+</tr>
+<tr>
+<td>CONTAINER_DATA</td>
+<td>N</td>
+</tr>
+<tr>
+<td>BEQUEATH</td>
+<td>DEFINER</td>
+</tr>
+<tr>
+<td>ORIGIN_CON_ID</td>
+<td>6</td>
+</tr>
+<tr>
+<td>DEFAULT_COLLATION</td>
+<td>USING_NLS_COMP</td>
+</tr>
+<tr>
+<td>CONTAINERS_DEFAULT</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>CONTAINER_MAP</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>EXTENDED_DATA_LINK</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>EXTENDED_DATA_LINK_MAP</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>HAS_SENSITIVE_COLUMN</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>ADMIT_NULL</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>PDB_LOCAL_ONLY</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>DUPLICATED</td>
+<td>N</td>
+</tr>
+<tr>
+<td>SHARDED</td>
+<td>N</td>
+</tr>
+</table>
+</div>
+</div>
+<div id="Master.4">
+<div class="masterreport">
+<table id="Table.4" cellpadding="0" cellspacing="0" summary="">
+<tr>
+<th>OWNER</th>
+<th>TRIGGER_NAME</th>
+<th>TRIGGER_TYPE</th>
+<th>TRIGGERING_EVENT</th>
+<th>STATUS</th>
+<th>OBJECT_ID</th>
+</tr>
+</table>
+<br/>
+<hr/>
+<br/><div id="ChildTabs.4">
+<div class="currentchildtab" onclick="onSelectChildTab(this, 0)">
+<div>
+<p></p>
+</div>
+</div>
+</div>
+<br/>
+<div id="ChildReports.4">
+</div>
+</div>
+</div>
+<div id="Master.5">
+<div class="masterreport">
+<table id="Table.5" cellpadding="0" cellspacing="0" summary="">
+<tr>
+<th>ATTRIBUTE</th>
+<th>Line:Position</th>
+<th>TEXT</th>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</body>
+</html>
