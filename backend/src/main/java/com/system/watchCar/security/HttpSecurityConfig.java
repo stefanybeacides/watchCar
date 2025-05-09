@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,10 +42,23 @@ public class HttpSecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/api/login", "/api/register", "/api/artigos", "/api/ocorrencias/criar").permitAll()
-                .antMatchers("/index.html", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-                .antMatchers("/h2-console/**/**").permitAll()
-                .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/configuration/**", "/webjars/**").permitAll()
+                .antMatchers(
+                        "/",
+                        "/index.html",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/api/login",
+                        "/api/register",
+                        "/api/artigos",
+                        "/api/ocorrencias/criar",
+                        "/h2-console/**/**",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**",
+                        "/configuration/**",
+                        "/webjars/**"
+                ).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
@@ -52,10 +66,11 @@ public class HttpSecurityConfig {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido ou expirado");
                 });
 
-        http.addFilterBefore(jwtAuthenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
 
     // Configurar WebSecurity para ignorar URLs específicas (como o Swagger e o H2 Console)
