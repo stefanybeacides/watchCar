@@ -41,10 +41,7 @@ public class ArquivoService {
             }
 
             try (InputStream inputStream = file.getInputStream()) {
-                Workbook workbook = StreamingReader.builder()
-                        .rowCacheSize(50)      // cache de 50 linhas
-                        .bufferSize(4096)      // tamanho do buffer (4 KB)
-                        .open(inputStream);    // arquivo Excel
+                Workbook workbook = new XSSFWorkbook(inputStream);
                 Sheet sheet = workbook.getSheetAt(0);
 
                 // Verificando os cabeçalhos para garantir que as colunas estão corretas
@@ -56,9 +53,9 @@ public class ArquivoService {
                 List<ArquivoDTO> arquivos = new ArrayList<>();
                 System.out.println("Última linha: " + sheet.getLastRowNum());
 
-                int limite = Math.min(sheet.getLastRowNum(), 100); // máximo 10 ou total de linhas disponíveis
+                int limite = Math.min(sheet.getLastRowNum(), 50); // máximo 10 ou total de linhas disponíveis
                 for (int i = 1; i <= limite; i++) {
-                //for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                    //for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                     Row row = sheet.getRow(i);
                     if (row == null) continue;
 
