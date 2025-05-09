@@ -53,7 +53,7 @@ public class ArquivoService {
                 List<ArquivoDTO> arquivos = new ArrayList<>();
                 System.out.println("Última linha: " + sheet.getLastRowNum());
 
-                int limite = Math.min(sheet.getLastRowNum(), 50); // máximo 10 ou total de linhas disponíveis
+                int limite = Math.min(sheet.getLastRowNum(), 50);
                 for (int i = 1; i <= limite; i++) {
                     //for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                     Row row = sheet.getRow(i);
