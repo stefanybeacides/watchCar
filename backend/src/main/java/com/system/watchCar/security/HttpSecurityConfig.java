@@ -42,6 +42,7 @@ public class HttpSecurityConfig {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/api/login", "/api/register", "/api/artigos", "/api/ocorrencias/criar").permitAll()
+                .antMatchers("/index.html", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                 .antMatchers("/h2-console/**/**").permitAll()
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/configuration/**", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
