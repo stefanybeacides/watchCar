@@ -44,6 +44,7 @@ public class HttpSecurityConfig {
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers(
                         "/",
+                        "/**", // ← libera tudo que for acessado diretamente (inclusive arquivos estáticos)
                         "/index.html",
                         "/css/**",
                         "/js/**",
@@ -59,6 +60,24 @@ public class HttpSecurityConfig {
                         "/configuration/**",
                         "/webjars/**"
                 ).permitAll()
+                .antMatchers(
+                        "/",
+                        "/**/*.html",
+                        "/**/*.css",
+                        "/**/*.js",
+                        "/**/*.png",
+                        "/**/*.jpg",
+                        "/**/*.jpeg",
+                        "/**/*.gif",
+                        "/**/*.svg",
+                        "/**/*.woff",
+                        "/**/*.woff2",
+                        "/**/*.ttf",
+                        "/**/*.eot",
+                        "/**/*.otf",
+                        "/**/*.pdf"
+                ).permitAll()
+
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
