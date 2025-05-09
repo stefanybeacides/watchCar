@@ -1,5 +1,6 @@
 package com.system.watchCar.service;
 
+import com.monitorjbl.xlsx.StreamingReader;
 import com.system.watchCar.dto.ArquivoDTO;
 import com.system.watchCar.dto.DenunciaRequest;
 import com.system.watchCar.entity.Artigo;
@@ -40,7 +41,10 @@ public class ArquivoService {
             }
 
             try (InputStream inputStream = file.getInputStream()) {
-                Workbook workbook = new XSSFWorkbook(inputStream);
+                Workbook workbook = StreamingReader.builder()
+                        .rowCacheSize(50)      // cache de 50 linhas
+                        .bufferSize(4096)      // tamanho do buffer (4 KB)
+                        .open(inputStream);    // arquivo Excel
                 Sheet sheet = workbook.getSheetAt(0);
 
                 // Verificando os cabeçalhos para garantir que as colunas estão corretas
@@ -52,7 +56,7 @@ public class ArquivoService {
                 List<ArquivoDTO> arquivos = new ArrayList<>();
                 System.out.println("Última linha: " + sheet.getLastRowNum());
 
-                int limite = Math.min(sheet.getLastRowNum(), 50); // máximo 10 ou total de linhas disponíveis
+                int limite = Math.min(sheet.getLastRowNum(), 100); // máximo 10 ou total de linhas disponíveis
                 for (int i = 1; i <= limite; i++) {
                 //for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                     Row row = sheet.getRow(i);

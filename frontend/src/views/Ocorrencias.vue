@@ -256,7 +256,7 @@ const handleFileUpload = async (event: Event) => {
   } catch (error: any) {
     store.stopLoading() // Para o loading quando a ação terminar
     window.location.reload()
-    toast.success('Erro na importação: ', error.message)
+    toast.error('Erro na importação: ', error.message)
     console.error('Erro na importação:', error.message)
   }
 }
