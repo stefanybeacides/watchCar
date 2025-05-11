@@ -41,6 +41,7 @@ import { login as loginApi, fetchUserData as fetchUserData } from '@/services/au
 import { toast } from 'vue3-toastify'
 import ForgotPasswordModal from '@/views/components/ForgotPasswordModal.vue'
 import { useLoadingStore } from '@/stores/loadingStore'
+const store = useLoadingStore()
 
 const loginCpf = ref('')
 const loginPassword = ref('')
@@ -48,7 +49,6 @@ const showPassword = ref(false)
 const cpfError = ref('')
 const router = useRouter()
 const forgotPasswordModal = ref<InstanceType<typeof ForgotPasswordModal> | null>(null)
-const store = useLoadingStore()
 
 onMounted(() => {
   const msg = localStorage.getItem('loginMessage')
