@@ -90,7 +90,6 @@ public class OcorrenciaController {
 
     @PostMapping("/acao-investigacao")
     public ResponseEntity<String> criarAcao(@RequestBody AcaoInvestigacaoRequest request) {
-        // Aqui você faria a chamada ao serviço ou repository para salvar no banco
         ocorrenciaService.salvar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("Ação registrada com sucesso.");
     }

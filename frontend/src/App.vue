@@ -75,6 +75,11 @@ const fecharMenu = () => {
 
 <template lang="pug">
 div.layout
+  div.alerta-sistema
+    p Atenção: Este sistema é um projeto de testes e 
+      strong não representa uma plataforma oficial de denúncias
+      | . As informações aqui inseridas são fictícias e utilizadas exclusivamente para fins acadêmicos e demonstrativos.
+
   header.navbar
     .container
       // Logo
@@ -394,5 +399,14 @@ body {
     width: 100%;
     text-align: left;
   }
+}
+
+.alerta-sistema {
+  background-color: #ffe5e5;
+  color: #a94442;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #e0b4b4;
 }
 </style>

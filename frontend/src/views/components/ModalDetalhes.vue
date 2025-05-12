@@ -61,7 +61,7 @@
               br
               span.data Data: {{ new Date(acao.dataAcao).toLocaleString('pt-BR') }}
               br
-              span.responsavel Responsável: {{ responsavel.username }}
+              span.responsavel Responsável: {{ acao.nomeResponsavel }}
           p(v-else) Nenhuma ação de investigação registrada.
 
       footer.modal-footer

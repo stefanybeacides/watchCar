@@ -56,8 +56,10 @@
           label Tipo de Ação:
           select(v-model="novoDetalhe.tipoAcao")
             option(value="") Selecione
-            option(value="INVESTIGACAO") Investigação
+            option(value="INVESTIGACAO") Investigação DP
             option(value="ACOMPANHAMENTO") Acompanhamento
+            option(value="Solucionado") Solucionar
+            option(value="Arquivado") Arquivado
             option(value="OUTRO") Outro
 
           label Descrição da Ação:

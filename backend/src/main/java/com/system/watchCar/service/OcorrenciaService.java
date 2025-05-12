@@ -415,6 +415,14 @@ public class OcorrenciaService {
         User usuario = userRepository.findById(request.getIdResponsavel())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + request.getIdResponsavel()));
 
+        if(request.getTipoAcao().equals("Solucionado") || request.getTipoAcao().equals("Arquivado")){
+            acao.setTipoAcao(request.getTipoAcao());
+            denuncia.setStatusDenuncia(request.getTipoAcao());
+            repository.save(denuncia);
+        }else{
+            acao.setTipoAcao(request.getTipoAcao());
+        }
+
         acao.setUser(usuario);
         acao.setDenuncia(denuncia);
         acao.setTipoAcao(request.getTipoAcao());
