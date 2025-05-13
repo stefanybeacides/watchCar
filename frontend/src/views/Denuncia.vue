@@ -1,24 +1,28 @@
 <template lang="pug">
+.template
   .denuncia
     h1 Registrar Denúncia de Roubo ou Furto de Veículo
 
     // Linha do tempo
     .timeline
+      .progress-line(:class="{ completed: progresso === 100 }")
+        .fill(:style="{ width: progresso + '%' }")
       .step(:class="{ active: etapa === 1, completed: etapa > 1 }")
         i.fas.fa-user
-        | Dados Pessoais
+        span Dados Pessoais
       .step(:class="{ active: etapa === 2, completed: etapa > 2 }")
         i.fas.fa-map-marker-alt
-        | Local
+        span Local
       .step(:class="{ active: etapa === 3, completed: etapa > 3 }")
         i.fas.fa-car
-        | Veículo
+        span Veículo
       .step(:class="{ active: etapa === 4, completed: etapa > 4 }")
         i.fas.fa-comment
-        | Descrição
-      .step(:class="{ active: etapa === 5, completed: etapa > 5 }")
+        span Descrição
+      .step(:class="{ active: etapa === 5 }")
         i.fas.fa-check-circle
-        | Finalizar
+        span Finalizar
+
 
 
     .line
@@ -30,24 +34,40 @@
             .anonimo-checkbox
               input(type="checkbox" id="anonimo" v-model="anonimo" @change="toggleAnonimo")
 
-          // Exibe dados pessoais apenas se não for anônimo
           .input-group(v-if="!anonimo")
-            label(for="username") Nome
+            label(for="username")
+            | Nome 
+            span.text-danger(v-if="mostrarAsteriscos") *
             input(type="text" id="username" v-model="usuario.username" :disabled="anonimo || (usuarioLogado && !anonimo)" :readonly="usuarioLogado")
 
           .input-group(v-if="!anonimo")
-            label(for="cpf") CPF
+            label(for="cpf") 
+            | CPF
+            span.text-danger(v-if="mostrarAsteriscos") *
             input(type="text" id="cpf" v-model="usuario.cpf" :disabled="anonimo || (usuarioLogado && !anonimo)" :readonly="usuarioLogado")
 
           .input-group(v-if="!anonimo")
-            label(for="email") E-mail
+            label(for="email") 
+            | E-mail
+            span.text-danger(v-if="mostrarAsteriscos") *
             input(type="email" id="email" v-model="usuario.email" :disabled="anonimo || (usuarioLogado && !anonimo)" :readonly="usuarioLogado")
+
       template(v-if="etapa === 2")
         .step-content(:class="{'active-step': etapa === 2}")
           .input-group
-            label(for="cep") CEP
-            input(type="text" id="cep" v-model="cep" required @blur="buscarEndereco")
-          
+            label(for="cep") 
+            | CEP
+            span.text-danger() *
+            input(
+              type="text"
+              id="cep"
+              v-model="formattedCep"
+              maxlength="9"
+              placeholder="Digite o CEP"
+              required
+              @input="formatCepInput"
+              @blur="buscarEndereco"
+            )
           .input-group
             label(for="logradouro") Logradouro
             input(type="text" id="logradouro" v-model="logradouro" required :disabled="cep.length < 8")
@@ -65,59 +85,83 @@
             input(type="text" id="estado" v-model="estado" required :disabled="cep.length < 8")
 
       template(v-if="etapa === 3")
-        .step-content(:class="{'active-step': etapa === 2}")
-              .input-group
-                label(for="artigoId") Tipo de Ocorrência
-                select(id="artigoId" v-model="artigoSelecionadoId" required)
-                  option(value="" disabled selected) Selecione o Tipo de Ocorrência
-                  option(v-for="artigo in artigos" :key="artigo.id" :value="artigo.id") {{ artigo.descricao }}
-              .input-group
-                label(for="placa") Placa do Veículo
-                input(type="text" id="placa" v-model="placa" required)
-              .input-group
-                label(for="ano") Ano do Veículo
-                input(type="number" id="ano" v-model="ano" required)
-              .input-group
-                label(for="marca") Marca
-                input(type="text" id="marca" v-model="marca" required)
-              .input-group
-                label(for="modelo") Modelo
-                input(type="text" id="modelo" v-model="modelo" required)
-              .input-group
-                label(for="cor") Cor
-                input(type="text" id="cor" v-model="cor" required)
-      template(v-if="etapa === 4")
         .step-content(:class="{'active-step': etapa === 3}")
-              .input-group
-                label(for="horaOcorrencia") Hora da Ocorrência
-                input(type="time" id="horaOcorrencia" v-model="horaOcorrencia" required)
-              .input-group
-                label(for="descricao") Descrição
-                textarea(id="descricao" v-model="descricao" required)
-      template(v-if="etapa === 5")
+          .input-group
+            label(for="artigoId") 
+            | Tipo de Ocorrência
+            span.text-danger() *
+            select(id="artigoId" v-model="artigoSelecionadoId" required)
+              option(value="" disabled selected) Selecione o Tipo de Ocorrência
+              option(v-for="artigo in artigos" :key="artigo.id" :value="artigo.id") {{ artigo.descricao }}
+          .input-group
+            label(for="placa") 
+            | Placa do Veículo
+            span.text-danger() *
+            input(type="text" id="placa" v-model="placa" required)
+          .input-group
+            label(for="ano") 
+              | Ano do Veículo
+              span.text-danger() *
+            select(id="ano" v-model="ano" required)
+              option(value="" disabled selected) Selecione o ano
+              option(v-for="ano in anosDisponiveis" :key="ano" :value="ano") {{ ano }}
+
+          .input-group
+            label(for="marca") 
+            | Marca
+            span.text-danger() *
+            input(type="text" id="marca" v-model="marca" required)
+          .input-group
+            label(for="modelo") 
+            | Modelo
+            span.text-danger() *
+            input(type="text" id="modelo" v-model="modelo" required)
+          .input-group
+            label(for="cor") 
+            | Cor
+            span.text-danger() *
+            input(type="text" id="cor" v-model="cor" required)
+
+      template(v-if="etapa === 4")
         .step-content(:class="{'active-step': etapa === 4}")
+          .input-group
+            label(for="dataOcorrencia") 
+            | Data da Ocorrência
+            span.text-danger() *
+            input(type="date" id="dataOcorrencia" v-model="dataOcorrencia" required)
+            
+          .input-group
+            label(for="horaOcorrencia") 
+            | Hora da Ocorrência
+            span.text-danger() *
+            input(type="time" id="horaOcorrencia" v-model="horaOcorrencia" required)
+            
+          .input-group
+            label(for="descricao") 
+            | Descrição
+            span.text-danger() *
+            textarea(id="descricao" v-model="descricao" required)
+
+      template(v-if="etapa === 5")
+        .step-content(:class="{'active-step': etapa === 5}")
           .termo-container
             h2 Termo de Envio de Denúncia
             p Ao prosseguir, você confirma que as informações fornecidas são verdadeiras e que entende as implicações legais da denúncia falsa.
             
-          // Exibe o checkbox para alertas se não for anônimo
           .input-alertas(v-if="!anonimo")
             label(for="receberAlertas") Deseja receber alertas por e-mail sobre sua denúncia?
             .alertas-checkbox
               input(type="checkbox" id="receberAlertas" v-model="receberAlertas")
               span Receber alertas por e-mail
 
+    .botoes
+      button.btn-voltar(type="button" @click="voltar" :disabled="etapa === 1") Voltar
+      button.btn-avancar(type="button" @click="proximaEtapa" :disabled="!podeAvancar") {{ etapa === 5 ? 'Enviar Denúncia' : 'Próxima Etapa' }}
 
-
-
-
-      .botoes
-        button.btn-voltar(type="button" @click="voltar" :disabled="etapa === 1") Voltar
-        button.btn-avancar(type="button" @click="proximaEtapa" :disabled="!podeAvancar") {{ etapa === 5 ? 'Enviar Denúncia' : 'Próxima Etapa' }}
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { fetchUserData } from '@/services/authService'
@@ -130,18 +174,36 @@ const router = useRouter()
 
 // Definindo os dados do formulário
 const placa = ref('')
-const ano = ref(0)
+const ano = ref<number | null>(null) // ✅ esta é a correta
 const marca = ref('')
 const modelo = ref('')
 const cor = ref('')
 const horaOcorrencia = ref('')
+const dataOcorrencia = ref('')
 const descricao = ref('')
 const anonimo = ref(false)
 const tipoOcorrencia = ref('')
 const artigos = ref([])
 const artigoSelecionadoId = ref(null)
 const receberAlertas = ref(true) // valor padrão: sim
+const anoAtual = new Date().getFullYear()
+const anosDisponiveis = ref<number[]>([])
+const formattedCep = ref('')
 
+const formatCepInput = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const raw = input.value.replace(/\D/g, '') // Remove tudo que não é número
+
+  // Formata com traço se possível
+  if (raw.length <= 5) {
+    formattedCep.value = raw
+  } else {
+    formattedCep.value = `${raw.slice(0, 5)}-${raw.slice(5, 8)}`
+  }
+
+  // Atualiza o CEP limpo para busca
+  cep.value = raw.slice(0, 8)
+}
 // Controle da etapa atual
 const etapa = ref(1) // Etapa inicial 1, agora etapa 2 será para localização
 
@@ -157,16 +219,22 @@ const logradouro = ref('')
 const bairro = ref('')
 const cidade = ref('')
 const estado = ref('')
+const progresso = computed(() => {
+  // Total de 5 etapas: 0%, 25%, 50%, 75%, 100%
+  return ((etapa.value - 1) / 4) * 100 // Ajusta a porcentagem de acordo com a etapa
+})
 
 // Função para buscar endereço usando o CEP
 const buscarEndereco = async () => {
   if (cep.value.length === 8) {
     try {
+      store.startLoading() // Inicia o loading
       const response = await axios.get(`https://viacep.com.br/ws/${cep.value}/json/`)
       logradouro.value = response.data.logradouro || ''
       bairro.value = response.data.bairro || ''
       cidade.value = response.data.localidade || ''
       estado.value = response.data.uf || ''
+      store.stopLoading() // Para o loading quando a ação terminar
     } catch (error) {
       toast.error('Erro ao buscar endereço. Verifique o CEP.')
     }
@@ -231,18 +299,20 @@ const voltar = () => {
 }
 
 const etapa1Valida = computed(() => {
-  return (
-    anonimo.value ||
-    (usuario.value.username.trim() !== '' &&
-      usuario.value.cpf.trim() !== '' &&
-      usuario.value.email.trim() !== '')
-  )
+  if (anonimo.value) return true
+
+  const nomeValido = usuario.value.username.trim() !== ''
+  const cpfValido = validarCPF(usuario.value.cpf)
+  const emailValido = validarEmail(usuario.value.email)
+
+  return nomeValido && cpfValido && emailValido
 })
 
 // Validação da etapa 2
 const etapa3Valida = computed(() => {
   return (
     placa.value.trim() !== '' &&
+    ano.value !== null &&
     ano.value > 0 &&
     marca.value.trim() !== '' &&
     modelo.value.trim() !== '' &&
@@ -279,14 +349,14 @@ const enviarDenuncia = async () => {
     }
 
     const denuncia = {
-      idUsuario: usuario.value.id || null, // Se o usuário estiver logado, pega o id, caso contrário, usa null
-      username: usuario.value.username, // Username preenchido no formulário
-      cpf: usuario.value.cpf,
-      email: usuario.value.email,
+      idUsuario: usuario.value.id || 1, // Se o usuário estiver logado, pega o id, caso contrário, usa null
+      username: anonimo.value ? 'Anônimo' : usuario.value.username,
+      cpf: anonimo.value ? null : usuario.value.cpf,
+      email: anonimo.value ? null : usuario.value.email,
       descricao: descricao.value,
       statusDenuncia: 'Em andamento',
       horaOcorrencia: horaOcorrencia.value,
-      dataHora: new Date().toISOString(),
+      dataHora: `${dataOcorrencia.value}T${horaOcorrencia.value}`,
       placa: placa.value,
       ano: ano.value,
       tipo: 'Carro',
@@ -326,6 +396,36 @@ const toggleAnonimo = () => {
 onMounted(() => {
   buscarUsuario()
   carregarArtigos()
+  for (let ano = anoAtual; ano >= anoAtual - 10; ano--) {
+    anosDisponiveis.value.push(ano)
+  }
+})
+
+function validarEmail(email: string): boolean {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return re.test(email.toLowerCase())
+}
+
+function validarCPF(cpf: string): boolean {
+  cpf = cpf.replace(/[^\d]+/g, '')
+
+  if (!cpf || cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false
+
+  let soma = 0
+  for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i)
+  let resto = 11 - (soma % 11)
+  if (resto === 10 || resto === 11) resto = 0
+  if (resto !== parseInt(cpf.charAt(9))) return false
+
+  soma = 0
+  for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i)
+  resto = 11 - (soma % 11)
+  if (resto === 10 || resto === 11) resto = 0
+  return resto === parseInt(cpf.charAt(10))
+}
+
+const mostrarAsteriscos = computed(() => {
+  return usuario.value.username.trim() !== ''
 })
 </script>
 
@@ -349,7 +449,14 @@ h1 {
 /* Campos de formulário */
 .input-group {
   margin-bottom: 1.2rem;
+  margin-top: 10px;
 }
+
+.input-group input {
+  margin-bottom: 1.2rem;
+  margin-top: 6px;
+}
+
 .input-anonimo {
   margin-bottom: 1.2rem;
   text-align: center;
@@ -363,7 +470,8 @@ label {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   padding: 0.7rem;
   font-size: 0.9rem;
@@ -373,7 +481,8 @@ textarea {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: none;
   border-color: #28a745;
 }
@@ -425,28 +534,7 @@ button:disabled {
   margin-right: 8px;
 }
 
-.active-step {
-  display: block;
-}
-
-.input-group {
-  margin-bottom: 1.2rem;
-}
-
-select {
-  width: 100%;
-  padding: 0.7rem;
-  font-size: 0.9rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: border-color 0.3s;
-}
-
-select:focus {
-  outline: none;
-  border-color: #28a745;
-}
-
+/* Termo de aceite */
 .termo-container {
   max-width: 600px;
   margin: 0 auto;
@@ -468,6 +556,7 @@ select:focus {
   color: #333;
 }
 
+/* Alertas */
 .input-alertas {
   margin-top: 1.2rem;
   text-align: center;
@@ -484,7 +573,7 @@ select:focus {
   width: 18px;
   height: 18px;
   margin-right: 8px;
-  accent-color: #28a745; /* verde personalizado */
+  accent-color: #28a745;
   cursor: pointer;
 }
 
@@ -492,77 +581,82 @@ select:focus {
   font-size: 0.95rem;
   color: #333;
 }
-/* Linha do tempo */
+
 .timeline {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 2rem;
   position: relative;
-  padding: 0 1rem;
+  margin: 40px 0;
+  align-items: center;
+  width: 100%;
+}
+.progress-line {
+  position: absolute;
+  top: 20%; /* A linha passa no meio dos ícones */
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background-color: #ccc; /* Linha de progresso cinza */
+  z-index: 0;
+  transition: width 0.4s ease;
+  transform: translateY(-50%);
+  width: 80%; /* Linha cinza ocupa toda a largura */
 }
 
+.progress-line .fill {
+  background-color: green; /* Preenchimento verde */
+  height: 3px;
+  width: 0%; /* Inicialmente, o verde começa com 0% */
+  transition: width 0.4s ease;
+}
+
+/* Estilo das etapas */
 .step {
-  flex: 1;
-  text-align: center;
-  padding: 0.8rem 0.5rem;
-  background-color: #e0e0e0;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  color: #555;
-  transition: all 0.3s;
   position: relative;
-  margin: 0 30px;
+  text-align: center;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-}
-
-.line {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: calc(100% - 40px); /* Deixe um espaço nas laterais para não encostar nos cards */
-  height: 2px;
-  background-color: #28a745; /* Cor da linha */
-  z-index: -1;
-}
-.step:not(:last-child) .line {
-  display: block; /* Exibe a linha entre os passos */
-}
-.step:last-child .line {
-  display: none; /* Não exibe a linha após o último passo */
+  z-index: 2;
 }
 
 .step i {
-  font-size: 1.5rem;
-  margin-bottom: 4px;
+  background-color: #ccc;
+  color: white;
+  border-radius: 50%;
+  padding: 10px;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  display: inline-block;
+  transition: all 0.3s ease;
+  position: absolute; /* Coloca o ícone no meio da linha */
+  top: -15px; /* Distância da linha */
 }
 
-.step.active {
+.step.active i {
+  background-color: #28a745; /* Cor verde para a etapa ativa */
+}
+
+.step span {
+  display: block;
+  font-size: 0.9rem;
+  color: #333;
+  margin-top: 30px; /* Ajusta a distância do texto em relação ao ícone */
+}
+
+.step.completed i {
+  background-color: #28a745; /* Cor verde para as etapas completadas */
+}
+
+.progress-line.completed {
   background-color: #28a745;
-  color: white;
-  font-weight: bold;
 }
 
-.step.completed {
-  background-color: #28a745;
-  color: white;
-  font-weight: bold;
-}
-
-.step.completed::after {
-  content: '✔';
-  font-size: 1rem;
-  color: white;
-  position: absolute;
-  top: 8px;
-  right: 10px;
-}
-
-/* Conteúdo de cada etapa */
-.step-content {
-  margin-bottom: 2rem;
-  animation: fadeIn 0.3s ease-in-out;
+/* Remover o ícone de check para etapas completadas */
+.step.completed::before {
+  content: ''; /* Remover ícone de check */
 }
 
 @keyframes fadeIn {
@@ -574,5 +668,10 @@ select:focus {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.text-danger {
+  color: red;
+  margin-left: 4px;
 }
 </style>

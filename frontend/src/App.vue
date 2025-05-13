@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watchEffect, onMounted } from 'vue'
+import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { toast } from 'vue3-toastify'
 
@@ -11,11 +11,18 @@ const userName = ref(localStorage.getItem('userName') || 'Usuário')
 const perfilUsuario = ref('PUBLICO')
 
 onMounted(() => {
-  const role = localStorage.getItem('userPerfil')
-  if (role) {
-    perfilUsuario.value = role
-  }
+  window.addEventListener('storage', updateUserData)
 })
+
+onUnmounted(() => {
+  window.removeEventListener('storage', updateUserData)
+})
+
+function updateUserData() {
+  authToken.value = localStorage.getItem('authToken')
+  userName.value = localStorage.getItem('userName') || 'Usuário'
+  perfilUsuario.value = localStorage.getItem('userPerfil') || 'PUBLICO'
+}
 
 const roleMap: Record<string, string> = {
   PUBLICO: 'Público',
@@ -100,12 +107,14 @@ div.layout
         nav.nav-buttons
           div(v-if="!isLoggedIn")
             RouterLink.nav-button(to="/login" @click="fecharMenu") Login
-            RouterLink.nav-button.primary(to="/register" @click="fecharMenu") Cadastre-se
-          div(v-if="isLoggedIn" class="nav-user-wrapper")
-            div.nav-user-info
-              span.nav-user-name {{ userName }}
-              div.nav-user-role {{ perfilUsuarioFormatado }}
-            button.nav-button.primary(@click="() => { handleLogout(); fecharMenu() }") Sair
+            RouterLink.nav-button.primary.ml(to="/register" @click="fecharMenu") Cadastre-se
+        div(v-if="isLoggedIn" class="nav-user-wrapper")
+          div.nav-user-info
+            span.nav-user-name {{ userName }}
+            div.nav-user-role {{ perfilUsuarioFormatado }}
+            RouterLink.nav-button.small-button.ml(to="/meus-dados" @click="fecharMenu") Meus Dados
+          button.nav-button.primary(@click="() => { handleLogout(); fecharMenu() }") Sair
+
 
 
   main.main-content
@@ -148,7 +157,7 @@ body {
 
 .nav-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 4rem;
 }
 
 .nav-user-name {
@@ -293,6 +302,7 @@ body {
 
 .nav-user-info {
   display: flex;
+  align-items: center; /* Centraliza tudo */
   flex-direction: column;
 }
 
@@ -408,5 +418,32 @@ body {
   text-align: center;
   font-size: 0.85rem;
   border-bottom: 1px solid #e0b4b4;
+}
+
+.nav-button.ml {
+  margin-left: 0.5rem;
+}
+
+.small-button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  border: 1px solid #42b983;
+  color: #42b983;
+  background-color: white;
+  border-radius: 4px;
+  text-align: center;
+  margin-top: 4%;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+  display: inline-block;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.small-button:hover {
+  background-color: #42b983;
+  color: white;
 }
 </style>

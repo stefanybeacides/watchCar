@@ -24,7 +24,15 @@ public class EmailService {
     @Value("${spring.mail.from}")
     private String from;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     public void enviarEmailComTemplate(String to, TipoTemplateEmail tipo, Map<String, Object> variables) {
+        if (variables.containsKey("token")) {
+            String token = (String) variables.get("token");
+            String url = frontendUrl + "/redefinir-senha?token=" + token;
+            variables.put("url", url);
+        }
         enviarTemplate(to, tipo.getTitulo(), tipo.getTemplateNome(), variables);
     }
 

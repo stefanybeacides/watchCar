@@ -123,7 +123,7 @@ const handleLogin = async () => {
       store.stopLoading() // Para o loading quando a ação terminar
 
       window.dispatchEvent(new Event('storage'))
-      await router.push({ name: 'inicio' })
+      await router.push({ name: 'ocorrencias' })
       window.location.reload()
     } else {
       store.stopLoading() // Para o loading quando a ação terminar

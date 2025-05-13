@@ -1,6 +1,41 @@
 <template lang="pug">
   .ocorrencias-container
     h1.titulo Ocorrências Registradas
+    .dashboard-cards(v-if="perfilUsuario !== 'PUBLICO'")
+      .card(
+        status="Todos"
+        :class="{ ativo: statusSelecionado === 'Todos', inativo: statusSelecionado !== 'Todos' }"
+        @click="filtrarPorStatus('Todos')"
+      )
+        h2 Todos
+        p.count {{ contagemStatus['Todos'] || 0 }}
+
+      .card(
+        status="Em andamento"
+        :class="{ ativo: statusSelecionado === 'Em andamento', inativo: statusSelecionado !== 'Em andamento' }"
+        @click="filtrarPorStatus('Em andamento')"
+      )
+        h2 Em Andamento
+        p.count {{ contagemStatus['Em andamento'] || 0 }}
+
+      .card(
+        status="Solucionado"
+        :class="{ ativo: statusSelecionado === 'Solucionado', inativo: statusSelecionado !== 'Solucionado' }"
+        @click="filtrarPorStatus('Solucionado')"
+      )
+        h2 Solucionado
+        p.count {{ contagemStatus['Solucionado'] || 0 }}
+
+      .card(
+        status="Arquivado"
+        :class="{ ativo: statusSelecionado === 'Arquivado', inativo: statusSelecionado !== 'Arquivado' }"
+        @click="filtrarPorStatus('Arquivado')"
+      )
+        h2 Arquivado
+        p.count {{ contagemStatus['Arquivado'] || 0 }}
+
+
+
 
     //- Filtros e botão
     .filters
@@ -17,6 +52,25 @@
           accept=".xlsx"
           style="display: none;"
         )
+        select(v-model="filters.usuarioNome")
+          option(value="") Nome do Usuário
+          option(v-for="nome in usuariosDisponiveis" :key="nome" :value="nome") {{ nome }}
+
+        select(v-model="filters.usuarioEmail")
+          option(value="") Email do Usuário
+          option(v-for="email in emailsDisponiveis" :key="email" :value="email") {{ email }}
+
+        select(v-model="filters.veiculoPlaca")
+          option(value="") Placa
+          option(v-for="placa in placasDisponiveis" :key="placa" :value="placa") {{ placa }}
+
+        select(v-model="filters.veiculoMarca")
+          option(value="") Marca
+          option(v-for="marca in marcasDisponiveis" :key="marca" :value="marca") {{ marca }}
+
+        select(v-model="filters.veiculoModelo")
+          option(value="") Modelo
+          option(v-for="modelo in modelosDisponiveis" :key="modelo" :value="modelo") {{ modelo }}
         select(v-model="filters.status")
           option(value="") Selecione o Status
           option(value="Em andamento") Em Andamento
@@ -30,6 +84,8 @@
         input(type="datetime-local" v-model="filters.dataInicio" placeholder="Data Início")
         input(type="datetime-local" v-model="filters.dataFim" placeholder="Data Fim")
         button(@click="fetchOcorrencias").btn Buscar
+        button(@click="limparFiltros").btn Limpar Filtros
+
 
     //- Tabela de Ocorrências
     .table-wrapper
@@ -130,7 +186,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { obterOcorrencias } from '@/services/ocorrenciasService'
+import {
+  obterOcorrencias,
+  obterTodasOcorrencias,
+  contarOcorrenciasPorStatus,
+} from '@/services/ocorrenciasService'
 import { buscarArtigos } from '@/services/artigoService'
 import ModalDetalhes from '@/views/components/ModalDetalhes.vue'
 import ModalEditar from '@/views/components/ModalEditar.vue'
@@ -147,19 +207,46 @@ import { EyeOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons-vue'
 import { useLoadingStore } from '@/stores/loadingStore'
 import { importarCsv } from '@/services/arquivoService' // Adicione essa linha no topo
 import { toast } from 'vue3-toastify'
+const statusSelecionado = ref('Todos')
+
+const filtrarPorStatus = (status: string) => {
+  if (status === 'Todos') {
+    // Se o status for 'Todos', limpa o filtro de status
+    statusSelecionado.value = 'Todos' // Marca 'Todos' como ativo
+    filters.value.status = '' // Limpa o filtro de status
+  } else {
+    // Para os outros status, apenas define o status selecionado
+    statusSelecionado.value = status
+    filters.value.status = status
+  }
+
+  currentPage.value = 0 // Reseta a página para a primeira página
+  fetchOcorrencias() // Recarrega as ocorrências com o filtro atualizado
+}
 
 const store = useLoadingStore()
 const ocorrencias = ref<any[]>([])
 const artigos = ref<any[]>([]) // Para armazenar os artigos
 const filters = ref({
   status: '',
-  artigo: '', // Aqui vai o ID do artigo
+  artigo: '',
   hora: '',
   dataInicio: '',
   dataFim: '',
+  usuarioNome: '',
+  usuarioEmail: '',
+  veiculoPlaca: '',
+  veiculoMarca: '',
+  veiculoModelo: '',
 })
+const placasDisponiveis = ref<string[]>([])
+const marcasDisponiveis = ref<string[]>([])
+const modelosDisponiveis = ref<string[]>([])
+const usuariosDisponiveis = ref<string[]>([])
+const emailsDisponiveis = ref<string[]>([])
 const currentPage = ref(0)
 const totalPages = ref(1)
+const totalelements = ref(1)
 const pageSize = ref(10)
 const token = localStorage.getItem('authToken')
 const perfilUsuario = ref(localStorage.getItem('userPerfil') || 'PUBLICO')
@@ -172,6 +259,23 @@ const responsabilidades = ref<any[]>([]) // Agora é um array para armazenar cad
 const responsabilidadeParaAlterar = ref(false) // Inicialmente, o usuário não é responsável.
 const modalLocalAberto = ref(false)
 const ocorrenciaLocalSelecionada = ref(null)
+
+const limparFiltros = () => {
+  filters.value = {
+    status: '',
+    artigo: '',
+    hora: '',
+    dataInicio: '',
+    dataFim: '',
+    usuarioNome: '',
+    usuarioEmail: '',
+    veiculoPlaca: '',
+    veiculoMarca: '',
+    veiculoModelo: '',
+  }
+  statusSelecionado.value = 'Todos'
+  fetchOcorrencias()
+}
 
 const abrirModalResponsavel = async (ocorrencia: any) => {
   ocorrenciaSelecionada.value = ocorrencia
@@ -233,11 +337,45 @@ const fetchOcorrencias = async () => {
     store.startLoading() // Inicia o loading
     const data = await obterOcorrencias(filters.value, currentPage.value, pageSize.value)
     ocorrencias.value = data.content
+    carregarFiltrosDinamicos()
+    totalelements.value = data.totalElements
     totalPages.value = data.totalPages
+    fetchContagemStatus() // Atualiza o dashboard
     store.stopLoading() // Para o loading quando a ação terminar
   } catch (error) {
     store.stopLoading() // Para o loading quando a ação terminar
     console.error('Erro ao carregar as ocorrências:', error)
+  }
+}
+
+const carregarFiltrosDinamicos = async () => {
+  try {
+    const todas = await obterTodasOcorrencias()
+
+    // Garantir que os Sets são tipados como Set<string>
+    const placas = new Set<string>()
+    const marcas = new Set<string>()
+    const modelos = new Set<string>()
+    const usuarios = new Set<string>()
+    const emails = new Set<string>()
+
+    todas.forEach((ocorrencia: any) => {
+      // Aqui estamos verificando se as propriedades existem antes de adicionar aos Sets
+      if (ocorrencia.veiculoPlaca) placas.add(ocorrencia.veiculoPlaca)
+      if (ocorrencia.veiculoMarca) marcas.add(ocorrencia.veiculoMarca)
+      if (ocorrencia.veiculoModelo) modelos.add(ocorrencia.veiculoModelo)
+      if (ocorrencia.usuarioNome) usuarios.add(ocorrencia.usuarioNome)
+      if (ocorrencia.usuarioEmail) emails.add(ocorrencia.usuarioEmail)
+    })
+
+    // Atribuindo os valores aos refs
+    placasDisponiveis.value = Array.from(placas)
+    marcasDisponiveis.value = Array.from(marcas)
+    modelosDisponiveis.value = Array.from(modelos)
+    usuariosDisponiveis.value = Array.from(usuarios)
+    emailsDisponiveis.value = Array.from(emails)
+  } catch (e) {
+    console.error('Erro ao carregar filtros dinâmicos:', e)
   }
 }
 
@@ -295,7 +433,14 @@ const changePage = (page: number) => {
 onMounted(() => {
   fetchOcorrencias()
   fetchArtigos() // Chama para buscar os artigos
+  carregarFiltrosDinamicos() // ✅ popula filtros apenas uma vez
 })
+
+const contagemStatus = ref({})
+
+const fetchContagemStatus = async () => {
+  contagemStatus.value = await contarOcorrenciasPorStatus()
+}
 </script>
 
 <style scoped>
@@ -632,5 +777,77 @@ onMounted(() => {
   .ocorrencias-table td {
     padding: 10px;
   }
+}
+.dashboard-cards {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.card {
+  display: flex;
+  flex-direction: column; /* Se o conteúdo estiver em coluna */
+  align-items: center; /* Centraliza o conteúdo horizontalmente */
+  justify-content: center; /* Centraliza o conteúdo verticalmente */
+  flex: 1 1 200px;
+  max-width: 250px;
+  min-height: 120px;
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: white;
+  text-align: center;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border 0.3s ease;
+}
+
+/* Card colors */
+.card[status='Em andamento'] {
+  background-color: #ffc107;
+}
+
+.card[status='Todos'] {
+  background-color: #0772ff;
+}
+
+.card[status='Solucionado'] {
+  background-color: #28a745;
+}
+
+.card[status='Arquivado'] {
+  background-color: #6c757d;
+}
+
+.card .count {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+/* Estilo para quando o card está ativo/selecionado */
+.card.ativo {
+  transform: scale(1.05); /* Aumenta ligeiramente o card */
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2); /* Sombras mais fortes */
+  border: 2px solid #fff; /* Borda branca para destacar */
+  cursor: pointer;
+  z-index: 1; /* Garante que o card ativo fique acima dos outros */
+}
+
+/* Estilo para os cards inativos (não selecionados), diminuindo seu tamanho */
+.card.inativo {
+  transform: scale(0.8); /* Diminui o tamanho dos cards não selecionados */
+  opacity: 0.7; /* Torna os cards inativos mais transparentes */
+}
+
+/* Efeito de hover para dar um feedback visual mais interessante */
+.card:hover {
+  transform: scale(1.02); /* Aumenta um pouco o card no hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombras mais suaves ao passar o mouse */
 }
 </style>

@@ -24,10 +24,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-
-// Estado de visibilidade
+import { forgotPassword } from '@/services/authService' // Importe o serviço de "Esqueci a Senha"
+import { toast } from 'vue3-toastify'
+import { useLoadingStore } from '@/stores/loadingStore'
+const store = useLoadingStore()
 const isVisible = ref(false)
 const recoverInput = ref('')
+const successMessage = ref('')
+const errorMessage = ref('')
 
 // Método para abrir o modal
 const openModal = () => {
@@ -37,6 +41,8 @@ const openModal = () => {
 const closeModal = () => {
   isVisible.value = false
   recoverInput.value = ''
+  successMessage.value = ''
+  errorMessage.value = ''
 }
 
 defineExpose({
@@ -45,12 +51,20 @@ defineExpose({
 })
 
 // Método para lidar com o envio
-const handleSubmit = () => {
+const handleSubmit = async () => {
   if (recoverInput.value) {
-    alert('Solicitação de recuperação enviada!')
-    closeModal()
+    try {
+      store.startLoading()
+      await forgotPassword(recoverInput.value)
+      toast.success('Um e-mail foi enviado para você com o link para redefinir a senha.')
+      store.stopLoading()
+    } catch (error) {
+      store.stopLoading()
+      errorMessage.value = 'Erro ao enviar a solicitação. Tente novamente mais tarde.'
+    }
   } else {
-    alert('Por favor, informe o CPF ou E-mail.')
+    store.stopLoading()
+    errorMessage.value = 'Por favor, informe o CPF ou E-mail.'
   }
 }
 </script>
@@ -120,5 +134,13 @@ input {
 
 .close-btn:hover {
   background-color: #999;
+}
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
 }
 </style>

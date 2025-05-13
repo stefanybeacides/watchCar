@@ -31,7 +31,7 @@ export const register = async (
     password,
     email,
     cpf,
-    tipo, // Tipo do usuário (1 = Cidadão, 2 = Policial, 3 = Agente de Segurança, 4 = Investigador, 5 = Gestor de Segurança Pública)
+    tipo,
   }
 
   // Adicionando campos específicos dependendo do tipo de usuário
@@ -53,7 +53,6 @@ export const register = async (
   return response.data
 }
 
-// Função para buscar dados do usuário autenticado
 export const fetchUserData = async () => {
   const token = getAuthToken()
 
@@ -61,7 +60,7 @@ export const fetchUserData = async () => {
     try {
       const response = await api.get('/user', {
         headers: {
-          Authorization: 'Bearer ' + token, // Adicionando o token ao cabeçalho
+          Authorization: 'Bearer ' + token,
         },
       })
       return response.data
@@ -71,5 +70,83 @@ export const fetchUserData = async () => {
     }
   } else {
     throw new Error('Token de autenticação não encontrado.')
+  }
+}
+
+export const forgotPassword = async (emailCpf: string) => {
+  try {
+    const response = await api.post('/forgotPassword', { emailCpf })
+    return response.data
+  } catch (error) {
+    console.error('Erro ao enviar email de redefinição de senha:', error)
+    throw error
+  }
+}
+
+export const resetPassword = async (token: string, novaSenha: string) => {
+  try {
+    const response = await api.post('/reset-password', { token, novaSenha })
+    return response.data
+  } catch (error) {
+    console.error('Erro ao redefinir senha:', error)
+    throw error
+  }
+}
+
+// Atualizar dados do usuário
+export const updateUserData = async (
+  id: string,
+  username: string,
+  email: string,
+  cpf: string,
+  tipo: number, // Tipo do usuário (1, 2, 3, 4, 5)
+  departamento: string,
+  cargo: string,
+  delegacia?: string,
+  distintivo?: string,
+  ra?: string,
+) => {
+  const token = getAuthToken()
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado.')
+  }
+
+  // Montando o corpo da requisição de acordo com o tipo de usuário
+  const body: any = {
+    id,
+    username,
+    email,
+    cpf,
+    tipo,
+    departamento,
+    cargo,
+  }
+
+  // Adicionando campos específicos dependendo do tipo de usuário
+  if (tipo === 2 || tipo === 3 || tipo === 4) {
+    // Se for Policial, Agente de Segurança ou Investigador
+    body.delegacia = delegacia
+    body.distintivo = distintivo
+    body.ra = ra
+  }
+
+  if (tipo === 5) {
+    // Se for Gestor de Segurança Pública
+    body.departamento = departamento
+    body.cargo = cargo
+  }
+
+  try {
+    const response = await api.put(`/usuario/update/${id}`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    return response
+  } catch (error) {
+    console.error('Erro ao atualizar dados do usuário:', error)
+    throw error
   }
 }

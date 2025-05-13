@@ -14,13 +14,13 @@
               input(type="radio" id="policial" :value="2" v-model="userType")
               | Policial
             label(for="AgenteDeSeguranca")
-              input(type="radio" id="publico" :value="3" v-model="userType")
+              input(type="radio" id="AgenteDeSeguranca" :value="3" v-model="userType")
               | Agente de Seguranca
             label(for="investigador")
-              input(type="radio" id="publico" :value="4" v-model="userType")
+              input(type="radio" id="investigador" :value="4" v-model="userType")
               | Investigador
             label(for="gestorDeSegurancaPublica")
-              input(type="radio" id="publico" :value="5" v-model="userType")
+              input(type="radio" id="gestorDeSegurancaPublica" :value="5" v-model="userType")
               | Gestor de Seguranca Publica
 
         div.input-group
@@ -62,9 +62,9 @@
             span.toggle-icon(@click="showConfirmPassword = !showConfirmPassword")
               i(:class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'")
 
-        // Exibe a mensagem de erro se as senhas não coincidirem
         span.error-message(v-if="confirmPasswordError") {{ confirmPasswordError }}
 
+        // Campos específicos para policiais e perfis semelhantes
         div.input-group(v-if="isPolicialOuSimilar")
           label(for="delegate") Delegacia
           input(type="text" id="delegate" v-model="delegate" required)
@@ -80,6 +80,7 @@
           input(type="text" id="ra" v-model="ra" required)
           span.error-message(v-if="raError") {{ raError }}
 
+        // Campos específicos para Gestor de Segurança Pública
         div.input-group(v-if="isGestor")
           label(for="departamento") Departamento
           input(type="text" id="departamento" v-model="departamento" required)

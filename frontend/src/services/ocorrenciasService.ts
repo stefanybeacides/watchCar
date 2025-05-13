@@ -14,9 +14,39 @@ export const enviarDenuncia = async (denuncia: any) => {
   }
 }
 
+export const obterTodasOcorrencias = async () => {
+  const token = getAuthToken()
+  if (!token) throw new Error('Token de autenticação não encontrado')
+
+  try {
+    // Aqui vamos forçar um size grande, ou criar uma rota sem paginação se for o caso
+    const url = `/ocorrencias/listar?page=0&size=10000`
+    const response = await api.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return response.data.content // só os dados
+  } catch (error) {
+    console.error('Erro ao buscar todas as ocorrências:', error)
+    throw error
+  }
+}
+
 // 🔹 Obter ocorrências com filtros e paginação
 export const obterOcorrencias = async (
-  filters: { status: string; artigo: string; hora: string; dataInicio: string; dataFim: string },
+  filters: {
+    status: string
+    artigo: string
+    hora: string
+    dataInicio: string
+    dataFim: string
+    usuarioNome: string
+    usuarioEmail: string
+    veiculoMarca: string
+    veiculoModelo: string
+    veiculoPlaca: string
+  },
   page: number = 0,
   size: number = 10,
 ) => {
@@ -24,7 +54,22 @@ export const obterOcorrencias = async (
   if (!token) throw new Error('Token de autenticação não encontrado')
 
   try {
-    const url = `/ocorrencias/listar?page=${page}&size=${size}&status=${filters.status}&artigo=${filters.artigo}&hora=${filters.hora}&dataInicio=${filters.dataInicio}&dataFim=${filters.dataFim}`
+    const params = new URLSearchParams({
+      page: String(page),
+      size: String(size),
+      status: filters.status || '',
+      artigo: filters.artigo || '',
+      hora: filters.hora || '',
+      dataInicio: filters.dataInicio || '',
+      dataFim: filters.dataFim || '',
+      usuarioNome: filters.usuarioNome || '',
+      usuarioEmail: filters.usuarioEmail || '',
+      veiculoMarca: filters.veiculoMarca || '',
+      veiculoModelo: filters.veiculoModelo || '',
+      veiculoPlaca: filters.veiculoPlaca || '',
+    })
+
+    const url = `/ocorrencias/listar?${params.toString()}`
     const response = await api.get(url, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -60,6 +105,16 @@ export const contarOcorrencias = async (filters: {
     console.error('Erro ao contar ocorrências:', error)
     throw error
   }
+}
+
+export const contarOcorrenciasPorStatus = async () => {
+  const token = getAuthToken()
+  const response = await api.get('/ocorrencias/contagem-por-status', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  return response.data
 }
 
 // 🔹 Obter ocorrência por ID

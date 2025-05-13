@@ -13,10 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,16 +52,18 @@ public class OcorrenciaService {
     private EntityManager entityManager;
 
     @Transactional
-    public Page<OcorrenciaDTO> obterOcorrenciasComDetalhes(User user, String status, String artigo, String hora,
-                                                           LocalDateTime dataInicio, LocalDateTime dataFim,
-                                                           int page, int size) {
+    public Page<OcorrenciaDTO> obterOcorrenciasComDetalhes(
+            User user, String status, String artigo, String hora,
+            String usuarioNome, String usuarioEmail, String veiculoMarca, String veiculoModelo, String veiculoPlaca,
+            LocalDateTime dataInicio, LocalDateTime dataFim, int page, int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size);
-
-        // Se for usuário do tipo PUBLICO, filtra pelas ocorrências dele
         Long idUsuario = user.getRole().getName() == RoleType.PUBLICO ? user.getId() : null;
 
-        Page<Ocorrencia> ocorrencias = findByFilters(status, artigo, hora, dataInicio, dataFim, idUsuario, pageRequest);
+        Page<Ocorrencia> ocorrencias = findByFilters(
+                status, artigo, hora, usuarioNome, usuarioEmail, veiculoMarca, veiculoModelo, veiculoPlaca,
+                dataInicio, dataFim, idUsuario, pageRequest
+        );
 
         List<OcorrenciaDTO> ocorrenciasComDetalhes = ocorrencias.getContent().stream()
                 .map(ocorrencia -> {
@@ -106,20 +105,26 @@ public class OcorrenciaService {
                     }
 
                     return dto;
-                })
-                .collect(Collectors.toList());
+                }).collect(Collectors.toList());
 
         return new PageImpl<>(ocorrenciasComDetalhes, pageRequest, ocorrencias.getTotalElements());
     }
 
 
 
-    public Page<Ocorrencia> findByFilters(String status, String artigo, String hora, LocalDateTime dataInicio, LocalDateTime dataFim, Long user, Pageable pageable) {
+
+    public Page<Ocorrencia> findByFilters(
+            String status, String artigo, String hora,
+            String usuarioNome, String usuarioEmail, String veiculoMarca, String veiculoModelo, String veiculoPlaca,
+            LocalDateTime dataInicio, LocalDateTime dataFim,
+            Long user, Pageable pageable) {
+
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Ocorrencia> query = cb.createQuery(Ocorrencia.class);
         Root<Ocorrencia> root = query.from(Ocorrencia.class);
 
         List<Predicate> predicates = new ArrayList<>();
+
         if (!status.isEmpty()) {
             predicates.add(cb.equal(root.get("statusDenuncia"), status));
         }
@@ -128,7 +133,8 @@ public class OcorrenciaService {
         }
         if (!hora.isEmpty()) {
             predicates.add(cb.equal(root.get("horaOcorrencia"), hora));
-        }if (user != null) {
+        }
+        if (user != null) {
             predicates.add(cb.equal(root.get("idUsuario"), user));
         }
         if (dataInicio != null) {
@@ -137,14 +143,53 @@ public class OcorrenciaService {
         if (dataFim != null) {
             predicates.add(cb.lessThanOrEqualTo(root.get("dataHora"), dataFim));
         }
-        query.select(root).where(predicates.toArray(new Predicate[0]));
+
+        // Subqueries para buscar por nome, email, marca, modelo, placa
+        if (!usuarioNome.isEmpty()) {
+            Subquery<Long> sub = query.subquery(Long.class);
+            Root<User> subRoot = sub.from(User.class);
+            sub.select(subRoot.get("id")).where(cb.like(cb.lower(subRoot.get("username")), "%" + usuarioNome.toLowerCase() + "%"));
+            predicates.add(root.get("idUsuario").in(sub));
+        }
+
+        if (!usuarioEmail.isEmpty()) {
+            Subquery<Long> sub = query.subquery(Long.class);
+            Root<User> subRoot = sub.from(User.class);
+            sub.select(subRoot.get("id")).where(cb.like(cb.lower(subRoot.get("email")), "%" + usuarioEmail.toLowerCase() + "%"));
+            predicates.add(root.get("idUsuario").in(sub));
+        }
+
+        if (!veiculoPlaca.isEmpty() || !veiculoMarca.isEmpty() || !veiculoModelo.isEmpty()) {
+            Subquery<Long> sub = query.subquery(Long.class);
+            Root<Veiculo> subRoot = sub.from(Veiculo.class);
+            Join<Object, Object> tipoVeiculoJoin = subRoot.join("tipoVeiculo");
+
+            List<Predicate> subPredicates = new ArrayList<>();
+            if (!veiculoPlaca.isEmpty()) {
+                subPredicates.add(cb.like(cb.lower(subRoot.get("placa")), "%" + veiculoPlaca.toLowerCase() + "%"));
+            }
+            if (!veiculoMarca.isEmpty()) {
+                subPredicates.add(cb.like(cb.lower(tipoVeiculoJoin.get("marca")), "%" + veiculoMarca.toLowerCase() + "%"));
+            }
+            if (!veiculoModelo.isEmpty()) {
+                subPredicates.add(cb.like(cb.lower(tipoVeiculoJoin.get("modelo")), "%" + veiculoModelo.toLowerCase() + "%"));
+            }
+
+            sub.select(subRoot.get("id")).where(cb.and(subPredicates.toArray(new Predicate[0])));
+            predicates.add(root.get("idVeiculo").in(sub));
+        }
+
+        query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
+
         TypedQuery<Ocorrencia> typedQuery = entityManager.createQuery(query);
-        long total = typedQuery.getResultList().size(); // Para contar o total de resultados
+        long total = typedQuery.getResultList().size();
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
+
         List<Ocorrencia> resultList = typedQuery.getResultList();
         return new PageImpl<>(resultList, pageable, total);
     }
+
 
 
     @Transactional
@@ -444,6 +489,23 @@ public class OcorrenciaService {
         }
     }
 
+    public Map<String, Long> contarOcorrenciasPorStatus() {
+        List<Object[]> resultados = repository.countGroupByStatus();
 
+        Map<String, Long> contagem = new HashMap<>();
+        long total = 0;
+
+        for (Object[] resultado : resultados) {
+            String status = (String) resultado[0];
+            Long quantidade = (Long) resultado[1];
+
+            contagem.put(status, quantidade);
+            total += quantidade;
+        }
+
+        contagem.put("Todos", total);
+
+        return contagem;
+    }
 }
 

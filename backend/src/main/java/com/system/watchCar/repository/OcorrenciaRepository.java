@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -39,13 +40,8 @@ public interface OcorrenciaRepository extends JpaRepository<Ocorrencia, Long>, J
     );
 
 
-
-
-
-
-
-
-
+    @Query("SELECT o.statusDenuncia, COUNT(o) FROM Ocorrencia o GROUP BY o.statusDenuncia")
+    List<Object[]> countGroupByStatus();
 }
 
 

@@ -1,7 +1,6 @@
 package com.system.watchCar.controller;
 
-import com.system.watchCar.dto.LoginRequest;
-import com.system.watchCar.dto.RegisterRequest;
+import com.system.watchCar.dto.*;
 import com.system.watchCar.entity.User;
 import com.system.watchCar.response.AuthResponse;
 import com.system.watchCar.service.AuthenticationService;
@@ -59,6 +58,29 @@ public class AuthenticationController {
                 .status(HttpStatus.CREATED)
                 .body(Map.of("success", true, "message", "Usuário criado com sucesso"));    }
 
+    @Operation(summary = "Register a new user", description = "Create a new user and save it to the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User  registered successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "409", description = "Username already exists")
+    })
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest emailCpf) {
+        authenticationService.forgotPassword(emailCpf.getEmailCpf());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(Map.of("success", true, "message", "Usuário criado com sucesso"));    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> redefinirSenha(@RequestBody ResetarSenhaRequest request) {
+        boolean sucesso = authenticationService.resetarSenha(request.getToken(), request.getNovaSenha());
+        if (sucesso) {
+            return ResponseEntity.ok("Senha redefinida com sucesso.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token inválido ou expirado.");
+        }
+    }
+
     @Operation(summary = "Get user details", description = "Retrieve the details of the authenticated user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User  details retrieved successfully"),
@@ -75,6 +97,19 @@ public class AuthenticationController {
         // Buscar o usuário no banco de dados com o nome de usuário
         User user = authenticationService.getUserDetails(username);
         return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/usuario/update/{id}")
+    public ResponseEntity<?> updateUser(
+            @PathVariable String id,
+            @RequestBody UserUpdateRequest userUpdateRequest) {
+
+        try {
+            authenticationService.updateUserData(id, userUpdateRequest);
+            return ResponseEntity.ok("Usuário atualizado com sucesso.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro ao atualizar os dados do usuário.");
+        }
     }
 
     private String getCurrentUsername() {

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -44,14 +45,31 @@ public class OcorrenciaController {
             @RequestParam(required = false, defaultValue = "") String status,
             @RequestParam(required = false, defaultValue = "") String artigo,
             @RequestParam(required = false, defaultValue = "") String hora,
+            @RequestParam(required = false, defaultValue = "") String usuarioNome,
+            @RequestParam(required = false, defaultValue = "") String usuarioEmail,
+            @RequestParam(required = false, defaultValue = "") String veiculoMarca,
+            @RequestParam(required = false, defaultValue = "") String veiculoModelo,
+            @RequestParam(required = false, defaultValue = "") String veiculoPlaca,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataInicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dataFim,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+
         String username = getCurrentUsername();
         User user = authenticationService.getUserDetails(username);
 
-        return ocorrenciaService.obterOcorrenciasComDetalhes(user, status, artigo, hora, dataInicio, dataFim, page, size);
+        return ocorrenciaService.obterOcorrenciasComDetalhes(
+                user, status, artigo, hora,
+                usuarioNome, usuarioEmail, veiculoMarca, veiculoModelo, veiculoPlaca,
+                dataInicio, dataFim, page, size
+        );
+    }
+
+
+    @GetMapping("/contagem-por-status")
+    public ResponseEntity<Map<String, Long>> contarPorStatus() {
+        Map<String, Long> contagem = ocorrenciaService.contarOcorrenciasPorStatus();
+        return ResponseEntity.ok(contagem);
     }
 
 
